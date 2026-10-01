@@ -70,6 +70,11 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
 .dl { display: inline-block; margin-top: 16px; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.14em; color: var(--abyss); background: var(--gold);
     padding: 9px 16px; text-decoration: none; }
 .dl:hover { background: var(--gold-pale); }
+.gram { margin: 0 0 10px; padding-left: 1.2em; font-size: 0.82rem; color: var(--dim); line-height: 1.9; }
+.lang .ex { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; border-bottom: 1px solid var(--abyss-edge); padding: 12px 0; }
+.lang .ex .src { min-width: 16em; font-size: 0.92rem; }
+.lang .ex .src small { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--gold-pale); margin-top: 3px; }
+.lang .ex canvas { max-width: 100%; height: auto; }
 .lg-h { font-size: 0.8rem; color: var(--gold, #c9a227); margin: 14px 0 6px; font-weight: 500; letter-spacing: 0.1em; }
 </style>
 </head>
@@ -146,6 +151,15 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
         <a class="dl" href="assets/Voidel-Regular.ttf" download>DOWNLOAD FONT — Voidel-Regular.ttf</a>
     </section>
 
+    <section class="lang">
+        <div class="sec-head"><p class="tag">Language</p><h2>ヴォイデル語</h2><span class="rule"></span></div>
+        <p class="note">語順と助詞の位置は日本語と同じで、単語だけが違います。漢字にあたる語は意味の字で、語尾・助詞は音の字で後ろに書きます(送り仮名と同じ考え方)。試作 v0.1。</p>
+        <ul class="gram" id="lx-grammar"></ul>
+        <h3 class="lg-h">文の例</h3><div id="lx-examples"></div>
+        <h3 class="lg-h">助詞・よく使う語</h3><div class="grid" id="lx-func"></div>
+        <h3 class="lg-h">語尾</h3><div class="grid" id="lx-suffix"></div>
+    </section>
+
     <section class="examples">
         <div class="sec-head"><p class="tag">Examples</p><h2>書いてみる</h2><span class="rule"></span></div>
         <div class="ex"><div class="src">ヴォイデル<small>KANA</small></div><canvas class="v" data-kana="ヴォイデル" data-size="26"></canvas></div>
@@ -155,7 +169,7 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
     </section>
 
     <footer>
-        <span>Voidel v0.1 — 2026-10-01</span>
+        <span>Voidel v0.1 — 2026-10-02</span>
         <span>&copy; 2026 Sacred Abyss</span>
     </footer>
 </div>
@@ -228,10 +242,27 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
             cell(document.getElementById('lg-parts'), [{ lg: '\u0000' + k }], LG.radicals[k].m.replace(/\(.*\)/, ''));
         });
         var how = function (ch) { return LG.chars[ch].p.map(function (id) { return /^d\d$/.test(id) ? id.slice(1) : LG.radicals[id].m.replace(/\(.*\)/, ''); }).join('+'); };
-        var put = function (id, list) { list.forEach(function (ch) { cell(document.getElementById(id), [{ lg: ch }], ch, LG.chars[ch].l === 'one' ? '' : how(ch)); }); };
+        var LXW = (window.__LX || {}).words || {};
+        var put = function (id, list) { list.forEach(function (ch) { cell(document.getElementById(id), [{ lg: ch }], ch + (LXW[ch] ? ' ' + LXW[ch] : ''), LG.chars[ch].l === 'one' ? '' : how(ch)); }); };
         put('lg-g1', LG.grade1.split(''));
         put('lg-g2', LG.grade2.split(''));
         put('lg-x', Object.keys(LG.chars).filter(function (c) { return c[0] !== '\u0000' && LG.grade1.indexOf(c) < 0 && LG.grade2.indexOf(c) < 0; }));
+    }
+    // ヴォイデル語(lexicon.json)
+    var LX = window.__LX;
+    if (LX) {
+        var gl = document.getElementById('lx-grammar');
+        LX.grammar.forEach(function (g) { var li = document.createElement('li'); li.textContent = g; gl.appendChild(li); });
+        var exb = document.getElementById('lx-examples');
+        LX.examples.forEach(function (e) {
+            var d = document.createElement('div'); d.className = 'ex';
+            var src = document.createElement('div'); src.className = 'src'; src.textContent = e.ja;
+            var sm = document.createElement('small'); sm.textContent = e.roman; src.appendChild(sm); d.appendChild(src);
+            var cv = document.createElement('canvas'); paint(cv, V.fromVoidel(e.src), 24); d.appendChild(cv);
+            exb.appendChild(d);
+        });
+        LX.func.forEach(function (f) { cell(document.getElementById('lx-func'), V.fromRoman(f.w), f.w, f.m); });
+        LX.suffix.filter(function (f) { return f.w; }).forEach(function (f) { cell(document.getElementById('lx-suffix'), V.fromRoman(f.w), '-' + f.w, f.m); });
     }
     // 例・見出し
     document.querySelectorAll('canvas.v').forEach(function (cv) {
