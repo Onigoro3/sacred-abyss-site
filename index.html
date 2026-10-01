@@ -11,7 +11,7 @@
 <link rel="icon" href="assets/sa-monogram.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Serif+JP:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Serif+JP:wght@300;500;700&family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif+KR:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* ------------------------------------------------------------------
    Sacred Abyss 公式サイト
@@ -367,6 +367,11 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
 
 /* 2026-10-01 事業が13件→16件に増え、高さ900px以下の画面で下の帯に重なった。
    低い画面だけ行の詰め方を締めて1画面に収める(広い画面の見え方は変えない) */
+/* 2026-10-01 右上に言語と音量の行が増え、1080px でも下の帯に近づいたので、こちらは少しだけ締める */
+@media (min-height: 901px) and (max-height: 1100px) {
+    .entry { padding: clamp(1px, 0.35vmin, 4px) 0; }
+    .entry .name { line-height: 1.6; }
+}
 @media (max-height: 900px) {
     .opus { gap: clamp(4px, 0.8vmin, 9px); }
     .entry { padding: 0; }
@@ -489,6 +494,37 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
 .bgm-toggle[aria-pressed="true"] .bgm-mark::after { animation: bgm-bar 0.9s ease-in-out -0.45s infinite alternate; }
 @keyframes bgm-bar { from { height: 2px; } to { height: 9px; } }
 @media (prefers-reduced-motion: reduce) { .bgm-toggle .bgm-mark::before, .bgm-toggle .bgm-mark::after { animation: none; } }
+
+/* 2026-10-01 言語の切り替え(右上)。日本語・英語・中国語(簡体/繁体)・韓国語 */
+.langs { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px 10px; margin-right: clamp(6px, 1vmin, 14px); }
+.langs button {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--mono); font-size: clamp(0.48rem, 0.9vmin, 0.62rem); letter-spacing: 0.12em; color: var(--dim);
+    border-bottom: 1px solid transparent;
+}
+.langs button:hover, .langs button:focus-visible { color: var(--bone); }
+.langs button[aria-current="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+html[lang="zh-Hans"] body { font-family: "Noto Serif SC", "Noto Serif JP", serif; }
+html[lang="zh-Hant"] body { font-family: "Noto Serif TC", "Noto Serif JP", serif; }
+html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
+
+/* BGM の行: ON/OFF と音量つまみ */
+.bgm-row { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: clamp(4px, 0.8vmin, 9px); }
+.bgm-row .bgm-toggle { margin-top: 0; }
+.bgm-vol { display: inline-flex; align-items: center; }
+.bgm-vol .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#bgm-volume { -webkit-appearance: none; appearance: none; width: clamp(64px, 9vmin, 110px); height: 2px; background: rgba(201, 162, 39, 0.35); outline: none; cursor: pointer; }
+#bgm-volume::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 0; }
+#bgm-volume::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 0; }
+#bgm-volume:focus-visible { box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.4); }
+
+/* 2026-10-01 概要の Entity / Founder / Founded は未解読の文字(ヴォイデル文字)で記す */
+.cell dd.glyph-dd { line-height: 0; padding-top: 2px; }
+.cell dd.glyph-dd .glyphs { display: inline-block; opacity: 0.85; }
+
+/* 2026-10-01 Location = 光り輝く深淵の首都「Lumvessa(ルムヴェッサ)」。ヴォイデル文字に続けて名を添える(どの言語でも同じ綴り) */
+.cell dd.place { display: inline-flex; align-items: center; gap: 8px; line-height: 1; }
+.cell dd.place .place-name { font-family: "Cormorant Garamond", serif; font-size: clamp(0.72rem, 1.3vmin, 0.95rem); letter-spacing: 0.16em; color: var(--gold-pale); }
 </style>
 </head>
 <body>
@@ -501,14 +537,20 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
     <header class="rail">
         <div>
             <h1 class="name-en">SACRED ABYSS</h1>
-            <p class="name-jp">セイクリッド アビス</p>
+            <p class="name-jp"><span data-i18n="reading">セイクリッド アビス</span></p>
         </div>
         <div class="rail-right">
             <p class="tag">Nihil Explicatur</p>
-            <p>この会社が何を目的にしているのかは、ここには書かれていません。</p>
+            <p><span data-i18n="nihil">この会社が何を目的にしているのかは、ここには書かれていません。</span></p>
+            <div class="bgm-row">
+                <nav class="langs" aria-label="Language">
+                <button type="button" data-lang="ja">日本語</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="zh-Hans">简体</button><button type="button" data-lang="zh-Hant">繁體</button><button type="button" data-lang="ko">한국어</button>
+            </nav>
             <button type="button" id="bgm-toggle" class="bgm-toggle" aria-pressed="false" aria-label="BGM の再生と停止">
                 <span class="bgm-mark" aria-hidden="true"></span><span class="bgm-label">Sonus</span><span class="bgm-state">OFF</span>
             </button>
+            <label class="bgm-vol"><span class="sr">Volume</span><input type="range" id="bgm-volume" min="0" max="100" step="1" value="50" aria-label="BGM volume"></label>
+            </div>
             <audio id="bgm" src="assets/sacred-void.mp3" loop preload="none"></audio>
         </div>
     </header>
@@ -518,15 +560,15 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
         <section class="panel panel-left">
             <div class="panel-head">
                 <p class="tag">Credo</p>
-                <h2>企業理念</h2>
+                <h2><span data-i18n="credo">企業理念</span></h2>
                 <span class="rule"></span>
             </div>
 
             <canvas class="glyphs" data-glyphs="11" data-seed="1341" data-size="30" aria-hidden="true"></canvas>
 
             <p class="creed">
-                深淵にいるはずなのに、<br>
-                <em>神聖なものを生み続ける。</em>
+                <span data-i18n="c1">深淵にいるはずなのに、</span><br>
+                <em><span data-i18n="c2">神聖なものを生み続ける。</span></em>
             </p>
 
             <p class="creed-en">
@@ -535,14 +577,14 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </p>
 
             <ul class="asks">
-                <li>何を目的に運営されているのか</li>
-                <li>何を目的に、これほど幅の広いコンテンツを出しているのか</li>
-                <li>何を目的に、良質なサービスを出し続けるのか</li>
+                <li><span data-i18n="q1">何を目的に運営されているのか</span></li>
+                <li><span data-i18n="q2">何を目的に、これほど幅の広いコンテンツを出しているのか</span></li>
+                <li><span data-i18n="q3">何を目的に、良質なサービスを出し続けるのか</span></li>
             </ul>
 
             <div class="sealed">
                 <canvas class="glyphs" data-glyphs="8" data-seed="7717" data-size="22" aria-hidden="true"></canvas>
-                <p>この三つに対する答えは、まだ訳されていません。</p>
+                <p><span data-i18n="qnote">この三つに対する答えは、まだ訳されていません。</span></p>
             </div>
         </section>
 
@@ -555,64 +597,64 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
         <section class="panel panel-right">
             <div class="panel-head">
                 <p class="tag">Opus</p>
-                <h2>事業</h2>
+                <h2><span data-i18n="opus">事業</span></h2>
                 <span class="rule"></span>
             </div>
 
             <div class="opus">
         <div>
-            <div class="group-label"><span class="jp">物販</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="2203" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g1">物販</span></span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="2203" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
             <a class="entry" href="https://www.onicard.net/" target="_blank" rel="noopener">
-                <span class="name">onicard — トレーディングカード専門店</span>
+                <span class="name"><span data-i18n="e1">onicard — トレーディングカード専門店</span></span>
                 <span class="where">Shop</span>
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">占術</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="3307" data-size="10" aria-hidden="true"></canvas><span class="count">02</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g2">占術</span></span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="3307" data-size="10" aria-hidden="true"></canvas><span class="count">02</span></div>
             <a class="entry" href="https://yuiplace.base.shop/" target="_blank" rel="noopener">
-                <span class="name">結いPlace — 占い鑑定</span>
+                <span class="name"><span data-i18n="e2">結いPlace — 占い鑑定</span></span>
                 <span class="where">Japan</span>
             </a>
             <a class="entry" href="https://www.etsy.com/shop/SacredAbyssJapan" target="_blank" rel="noopener">
-                <span class="name">Sacred Abyss Japan — 英語の鑑定書</span>
+                <span class="name"><span data-i18n="e3">Sacred Abyss Japan — 英語の鑑定書</span></span>
                 <span class="where">Etsy</span>
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">映像</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="4409" data-size="10" aria-hidden="true"></canvas><span class="count">04</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g3">映像</span></span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="4409" data-size="10" aria-hidden="true"></canvas><span class="count">04</span></div>
             <a class="entry" href="https://www.youtube.com/@japanin60-c8m" target="_blank" rel="noopener">
-                <span class="name">Japan in 60 — 日本の名所を巡る</span>
+                <span class="name"><span data-i18n="e4">Japan in 60 — 日本の名所を巡る</span></span>
                 <span class="where">YouTube</span>
             </a>
             <a class="entry" href="https://www.youtube.com/@honyaku_kaitai" target="_blank" rel="noopener">
-                <span class="name">翻訳の言語学 解体新書</span>
+                <span class="name"><span data-i18n="e5">翻訳の言語学 解体新書</span></span>
                 <span class="where">YouTube</span>
             </a>
             <a class="entry" href="https://www.youtube.com/@sekainozekkei" target="_blank" rel="noopener">
-                <span class="name">世界の絶景研究所</span>
+                <span class="name"><span data-i18n="e6">世界の絶景研究所</span></span>
                 <span class="where">YouTube</span>
             </a>
             <a class="entry" href="https://japanin.net/" target="_blank" rel="noopener">
-                <span class="name">japanin.net — 旅行ガイド</span>
+                <span class="name"><span data-i18n="e7">japanin.net — 旅行ガイド</span></span>
                 <span class="where">Web</span>
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">記事</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="5501" data-size="10" aria-hidden="true"></canvas><span class="count">05</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g4">記事</span></span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="5501" data-size="10" aria-hidden="true"></canvas><span class="count">05</span></div>
             <a class="entry" href="https://magicaidrop.hatenablog.com/" target="_blank" rel="noopener">
-                <span class="name">型落ち家電ラボ</span>
+                <span class="name"><span data-i18n="e8">型落ち家電ラボ</span></span>
                 <span class="where">Blog</span>
             </a>
             <a class="entry" href="https://kataochi-gadget-hikakusho.hatenablog.com/" target="_blank" rel="noopener">
-                <span class="name">型落ちガジェット比較所</span>
+                <span class="name"><span data-i18n="e9">型落ちガジェット比較所</span></span>
                 <span class="where">Blog</span>
             </a>
             <a class="entry" href="https://magicaidemon.hatenablog.com/" target="_blank" rel="noopener">
-                <span class="name">海外SIM・eSIM比較ガイド</span>
+                <span class="name"><span data-i18n="e10">海外SIM・eSIM比較ガイド</span></span>
                 <span class="where">Blog</span>
             </a>
             <a class="entry" href="https://magicaitravel.hatenablog.com/" target="_blank" rel="noopener">
-                <span class="name">直前ホテル特価ナビ</span>
+                <span class="name"><span data-i18n="e11">直前ホテル特価ナビ</span></span>
                 <span class="where">Blog</span>
             </a>
             <a class="entry" href="https://magicaivenus.hatenablog.com/" target="_blank" rel="noopener">
@@ -621,24 +663,24 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">出版</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="6607" data-size="10" aria-hidden="true"></canvas><span class="count">03</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g5">出版</span></span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="6607" data-size="10" aria-hidden="true"></canvas><span class="count">03</span></div>
             <a class="entry" href="https://note.com/backstory_jp" target="_blank" rel="noopener">
-                <span class="name">日本語、英語で言うと — 解体新書</span>
+                <span class="name"><span data-i18n="e12">日本語、英語で言うと — 解体新書</span></span>
                 <span class="where">note</span>
             </a>
             <a class="entry" href="https://backstoryofjapan.substack.com/" target="_blank" rel="noopener">
-                <span class="name">Backstory of Japan — 日本の出来事の背景</span>
+                <span class="name"><span data-i18n="e13">Backstory of Japan — 日本の出来事の背景</span></span>
                 <span class="where">Substack</span>
             </a>
             <div class="entry">
-                <span class="name">Beyond the Guidebook — 英語の電子書籍</span>
+                <span class="name"><span data-i18n="e14">Beyond the Guidebook — 英語の電子書籍</span></span>
                 <span class="where">Kindle</span>
             </div>
         </div>
         <div>
-            <div class="group-label"><span class="jp">道具</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="7703" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
+            <div class="group-label"><span class="jp"><span data-i18n="g6">道具</span></span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="7703" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
             <a class="entry" href="https://sacredabyss.booth.pm/" target="_blank" rel="noopener">
-                <span class="name">業務を軽くする道具 — OCR・動画作成</span>
+                <span class="name"><span data-i18n="e15">業務を軽くする道具 — OCR・動画作成</span></span>
                 <span class="where">BOOTH</span>
             </a>
         </div>
@@ -650,19 +692,19 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
     <footer class="codex">
         <div class="codex-head">
             <p class="tag">Codex</p>
-            <h2>概要</h2>
+            <h2><span data-i18n="codex">概要</span></h2>
             <span class="rule"></span>
         </div>
 
         <div class="record">
             <dl class="cell"><dt>Name</dt><dd>Sacred Abyss</dd></dl>
-            <dl class="cell"><dt>Entity</dt><dd>個人事業 — 屋号 Sacred Abyss</dd></dl>
-            <dl class="cell"><dt>Founder</dt><dd class="void">—</dd></dl>
-            <dl class="cell"><dt>Location</dt><dd class="void">—</dd></dl>
-            <dl class="cell"><dt>Founded</dt><dd class="void">—</dd></dl>
-            <dl class="cell"><dt>Business</dt><dd>上記のとおり</dd></dl>
+            <dl class="cell"><dt>Entity</dt><dd class="glyph-dd"><canvas class="glyphs" data-glyphs="6" data-seed="8117" data-size="13" aria-label="未解読" role="img"></canvas></dd></dl>
+            <dl class="cell"><dt>Founder</dt><dd class="glyph-dd"><canvas class="glyphs" data-glyphs="4" data-seed="9241" data-size="13" aria-label="未解読" role="img"></canvas></dd></dl>
+            <dl class="cell"><dt>Location</dt><dd class="glyph-dd place"><canvas class="glyphs" data-glyphs="5" data-seed="3901" data-size="13" aria-hidden="true"></canvas><span class="place-name">Lumvessa</span></dd></dl>
+            <dl class="cell"><dt>Founded</dt><dd class="glyph-dd"><canvas class="glyphs" data-glyphs="4" data-seed="1066" data-size="13" aria-label="未解読" role="img"></canvas></dd></dl>
+            <dl class="cell"><dt>Business</dt><dd><span data-i18n="biz">上記のとおり</span></dd></dl>
             <dl class="cell"><dt>Contact</dt><dd><a class="mail" href="mailto:sa-void@sacred-abyss.com">SA-Void@Sacred-Abyss.com</a></dd></dl>
-            <p class="note">記載のない項目は、書けないのではなく、書かないことにしています。<br>&copy; 2026 Sacred Abyss</p>
+            <p class="note"><span data-i18n="foot">記載のない項目は、書けないのではなく、書かないことにしています。</span><br>&copy; 2026 Sacred Abyss</p>
         </div>
     </footer>
 
@@ -1087,67 +1129,166 @@ function drawGlyph(ctx, x, y, s, rnd) {
 })();
 
 /* ==================================================================
-   BGM(2026-10-01 社長「BGMを設定してループして流れるように、ONとOFFできるように」)
-   既定は流す。ただしブラウザは音の自動再生を止めることが多いので、
-   止められたら画面への最初の操作(クリック・キー)で流し始める。
-   OFF にした人は、次に来たときも OFF のまま(この端末だけの覚え書き)。
+   BGM(2026-10-01 社長「BGMを設定してループして流れるように、ONとOFFできるように」
+   「最後まで流しきったらすぐに冒頭に繋ぐ」「音量の調整が見えるように」)
+   ・曲の頭 約2.2秒はほぼ無音(-94dB)なので、そこは飛ばして鳴り始めから流し、
+     最後まで行ったら鳴り始めへ間をあけずに戻る(Web Audio の loopStart/loopEnd)。
+     <audio loop> だと冒頭の無音と読み直しの分だけ間があくため使わない(Web Audio が無いブラウザだけ予備で使う)
+   ・既定は流す。ブラウザが自動再生を止めたら、画面への最初の操作で流し始める
+   ・OFF と音量はこの端末だけに覚える
    ================================================================== */
 (function bgm() {
-    var audio = document.getElementById('bgm');
+    var audioEl = document.getElementById('bgm');
     var btn = document.getElementById('bgm-toggle');
-    if (!audio || !btn) return;
-    var KEY = 'sa-bgm';
-    var TARGET = 0.5;
-    var wantOn = true;
+    var vol = document.getElementById('bgm-volume');
+    if (!audioEl || !btn) return;
+    var SRC = audioEl.getAttribute('src');
+    var LOOP_START = 2.2;            // 鳴り始め(秒)。ffmpeg の silencedetect で測った値
+    var KEY = 'sa-bgm', VKEY = 'sa-bgm-vol';
+    var level = 0.5, wantOn = true, on = false;
     try { if (localStorage.getItem(KEY) === 'off') wantOn = false; } catch (e) {}
+    try { var sv = localStorage.getItem(VKEY); if (sv !== null && !isNaN(+sv)) level = Math.max(0, Math.min(1, +sv)); } catch (e) {}
+    if (vol) vol.value = Math.round(level * 100);
 
-    function show(on) {
-        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        btn.querySelector('.bgm-state').textContent = on ? 'ON' : 'OFF';
+    var AC = window.AudioContext || window.webkitAudioContext;
+    var ctx = null, gain = null, buffer = null, source = null, loading = null;
+
+    function show(v) {
+        on = v;
+        btn.setAttribute('aria-pressed', v ? 'true' : 'false');
+        btn.querySelector('.bgm-state').textContent = v ? 'ON' : 'OFF';
     }
-    function fadeTo(v, done) {
-        var step = (v - audio.volume) / 20, k = 0;
-        var t = setInterval(function () {
-            k++;
-            audio.volume = Math.max(0, Math.min(1, audio.volume + step));
-            if (k >= 20) { clearInterval(t); audio.volume = v; if (done) done(); }
-        }, 40);
+    function load() {
+        if (loading) return loading;
+        ctx = new AC();
+        gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination);
+        loading = fetch(SRC).then(function (r) { return r.arrayBuffer(); }).then(function (ab) {
+            return new Promise(function (res, rej) { ctx.decodeAudioData(ab, res, rej); });
+        }).then(function (buf) { buffer = buf; return buf; });
+        return loading;
     }
-    function play() {
-        audio.volume = 0;
-        var p = audio.play();
-        if (p && p.then) {
-            return p.then(function () { show(true); fadeTo(TARGET); return true; })
-                    .catch(function () { show(false); return false; });
-        }
-        show(true); fadeTo(TARGET);
-        return Promise.resolve(true);
+    function ramp(to, sec) {
+        var t = ctx.currentTime;
+        gain.gain.cancelScheduledValues(t);
+        gain.gain.setValueAtTime(gain.gain.value, t);
+        gain.gain.linearRampToValueAtTime(to, t + sec);
     }
-    function stop() { fadeTo(0, function () { audio.pause(); }); show(false); }
-    function remember(on) { try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) {} }
+    function playWA() {
+        return load().then(function () {
+            return ctx.resume();
+        }).then(function () {
+            if (ctx.state !== 'running') throw new Error('blocked');
+            if (!source) {
+                source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                source.loopStart = Math.min(LOOP_START, buffer.duration - 1);
+                source.loopEnd = buffer.duration;
+                source.connect(gain);
+                source.start(0, source.loopStart);
+            }
+            ramp(level, 0.8);
+            show(true);
+            return true;
+        });
+    }
+    function stopWA() {
+        if (!ctx) return;
+        ramp(0, 0.6);
+        var s0 = source; source = null;
+        setTimeout(function () { try { if (s0) s0.stop(); } catch (e) {} }, 700);
+    }
+    function playEl() {
+        audioEl.loop = true; audioEl.volume = level;
+        var p = audioEl.play();
+        return (p && p.then ? p : Promise.resolve()).then(function () { show(true); return true; });
+    }
+    function play() { return (AC ? playWA() : playEl()).catch(function () { show(false); return false; }); }
+    function stop() { if (AC) stopWA(); else audioEl.pause(); show(false); }
+    function remember(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
     btn.addEventListener('click', function (ev) {
         ev.stopPropagation();
-        if (audio.paused) { remember(true); wantOn = true; play(); }
-        else { remember(false); wantOn = false; stop(); }
+        if (on) { wantOn = false; remember(KEY, 'off'); stop(); }
+        else { wantOn = true; remember(KEY, 'on'); play(); }
     });
+    if (vol) {
+        vol.addEventListener('input', function () {
+            level = vol.value / 100;
+            remember(VKEY, String(level));
+            if (on) { if (AC && gain) ramp(level, 0.08); else audioEl.volume = level; }
+        });
+    }
 
     show(false);
     if (!wantOn) return;
     play().then(function (ok) {
         if (ok) return;
-        // 自動再生を止められた → 最初の操作で流す
         var once = function (ev) {
-            // ボタン自体を押したときはボタンの処理に任せる(ここで流すと、直後のクリックで止まってしまう)
-            if (ev && ev.target && btn.contains(ev.target)) return;
+            if (ev && ev.target && (btn.contains(ev.target) || (vol && vol.contains(ev.target)))) return;
             document.removeEventListener('pointerdown', once, true);
             document.removeEventListener('keydown', once, true);
-            if (wantOn && audio.paused) play();
+            if (wantOn && !on) play();
         };
         document.addEventListener('pointerdown', once, true);
         document.addEventListener('keydown', once, true);
     });
 })();
+
+/* ==================================================================
+   言語(2026-10-01 社長「English等各言語に対応させて」)
+   日本語の文言は HTML にそのまま置き、ほかの言語は下の辞書で差し替える。
+   最初はブラウザの言語に合わせ、右上で切り替えたらこの端末に覚える。
+   英語の札(Credo / Opus / Codex 等)と未解読の文字はどの言語でも変えない。
+   ================================================================== */
+(function i18n() {
+    var DICT = {"ja": {"reading": "セイクリッド アビス", "nihil": "この会社が何を目的にしているのかは、ここには書かれていません。", "credo": "企業理念", "c1": "深淵にいるはずなのに、", "c2": "神聖なものを生み続ける。", "q1": "何を目的に運営されているのか", "q2": "何を目的に、これほど幅の広いコンテンツを出しているのか", "q3": "何を目的に、良質なサービスを出し続けるのか", "qnote": "この三つに対する答えは、まだ訳されていません。", "opus": "事業", "g1": "物販", "g2": "占術", "g3": "映像", "g4": "記事", "g5": "出版", "g6": "道具", "e1": "onicard — トレーディングカード専門店", "e2": "結いPlace — 占い鑑定", "e3": "Sacred Abyss Japan — 英語の鑑定書", "e4": "Japan in 60 — 日本の名所を巡る", "e5": "翻訳の言語学 解体新書", "e6": "世界の絶景研究所", "e7": "japanin.net — 旅行ガイド", "e8": "型落ち家電ラボ", "e9": "型落ちガジェット比較所", "e10": "海外SIM・eSIM比較ガイド", "e11": "直前ホテル特価ナビ", "e12": "日本語、英語で言うと — 解体新書", "e13": "Backstory of Japan — 日本の出来事の背景", "e14": "Beyond the Guidebook — 英語の電子書籍", "e15": "業務を軽くする道具 — OCR・動画作成", "codex": "概要", "entity": "個人事業 — 屋号 Sacred Abyss", "biz": "上記のとおり", "foot": "記載のない項目は、書けないのではなく、書かないことにしています。"}, "en": {"reading": "", "nihil": "What this company exists for is not written here.", "credo": "Philosophy", "c1": "Dwelling in the abyss,", "c2": "yet bringing forth the sacred, without end.", "q1": "For what purpose is it run?", "q2": "Why does it put out so wide a range of content?", "q3": "Why does it keep offering services of quality?", "qnote": "The answers to these three have not yet been translated.", "opus": "Works", "g1": "Retail", "g2": "Divination", "g3": "Video", "g4": "Articles", "g5": "Publishing", "g6": "Tools", "e1": "onicard — trading card shop", "e2": "結いPlace — fortune readings", "e3": "Sacred Abyss Japan — readings in English", "e4": "Japan in 60 — touring Japan's landmarks", "e5": "Kaitai Shinsho — the linguistics of translation", "e6": "World Scenery Lab", "e7": "japanin.net — travel guide", "e8": "Last-Model Appliance Lab", "e9": "Last-Model Gadget Comparisons", "e10": "Overseas SIM & eSIM Guide", "e11": "Last-Minute Hotel Deals", "e12": "Japanese, said in English — Kaitai Shinsho", "e13": "Backstory of Japan — the stories behind events in Japan", "e14": "Beyond the Guidebook — e-book in English", "e15": "Tools that lighten the work — OCR, video making", "codex": "Overview", "entity": "Sole proprietorship — trading as Sacred Abyss", "biz": "As listed above", "foot": "Nothing left blank here is unwritable; we have chosen not to write it."}, "zh-Hans": {"reading": "神圣深渊", "nihil": "这家公司为何而存在，这里没有写。", "credo": "企业理念", "c1": "身处深渊，", "c2": "却不断孕育神圣之物。", "q1": "为了什么目的而运营？", "q2": "为何推出如此广泛的内容？", "q3": "为何持续提供优质的服务？", "qnote": "这三个问题的答案，尚未被翻译。", "opus": "事业", "g1": "零售", "g2": "占术", "g3": "影像", "g4": "文章", "g5": "出版", "g6": "工具", "e1": "onicard — 集换式卡牌专卖店", "e2": "結いPlace — 占卜鉴定", "e3": "Sacred Abyss Japan — 英文鉴定书", "e4": "Japan in 60 — 巡游日本名胜", "e5": "翻译语言学 解体新书", "e6": "世界绝景研究所", "e7": "japanin.net — 旅行指南", "e8": "上一代家电实验室", "e9": "上一代数码产品比较所", "e10": "海外SIM・eSIM比较指南", "e11": "临近入住酒店特价导航", "e12": "日语用英语怎么说 — 解体新书", "e13": "Backstory of Japan — 日本事件的背景", "e14": "Beyond the Guidebook — 英文电子书", "e15": "减轻工作的工具 — OCR・视频制作", "codex": "概要", "entity": "个体经营 — 商号 Sacred Abyss", "biz": "如上所列", "foot": "未记载的项目，并非无法写，而是选择不写。"}, "zh-Hant": {"reading": "神聖深淵", "nihil": "這家公司為何而存在，這裡沒有寫。", "credo": "企業理念", "c1": "身處深淵，", "c2": "卻不斷孕育神聖之物。", "q1": "為了什麼目的而運營？", "q2": "為何推出如此廣泛的內容？", "q3": "為何持續提供優質的服務？", "qnote": "這三個問題的答案，尚未被翻譯。", "opus": "事業", "g1": "零售", "g2": "占術", "g3": "影像", "g4": "文章", "g5": "出版", "g6": "工具", "e1": "onicard — 集換式卡牌專賣店", "e2": "結いPlace — 占卜鑑定", "e3": "Sacred Abyss Japan — 英文鑑定書", "e4": "Japan in 60 — 巡遊日本名勝", "e5": "翻譯語言學 解體新書", "e6": "世界絕景研究所", "e7": "japanin.net — 旅行指南", "e8": "上一代家電實驗室", "e9": "上一代數位產品比較所", "e10": "海外SIM・eSIM比較指南", "e11": "臨近入住飯店特價導航", "e12": "日語用英語怎麼說 — 解體新書", "e13": "Backstory of Japan — 日本事件的背景", "e14": "Beyond the Guidebook — 英文電子書", "e15": "減輕工作的工具 — OCR・影片製作", "codex": "概要", "entity": "個人事業 — 商號 Sacred Abyss", "biz": "如上所列", "foot": "未記載的項目，並非無法寫，而是選擇不寫。"}, "ko": {"reading": "세이크리드 어비스", "nihil": "이 회사가 무엇을 위해 존재하는지는 여기에 적혀 있지 않습니다.", "credo": "기업 이념", "c1": "심연에 있으면서도,", "c2": "신성한 것을 끊임없이 만들어 낸다.", "q1": "무엇을 위해 운영되는가", "q2": "왜 이토록 폭넓은 콘텐츠를 내놓는가", "q3": "왜 좋은 서비스를 계속 내놓는가", "qnote": "이 세 가지에 대한 답은 아직 번역되지 않았습니다.", "opus": "사업", "g1": "판매", "g2": "점술", "g3": "영상", "g4": "기사", "g5": "출판", "g6": "도구", "e1": "onicard — 트레이딩 카드 전문점", "e2": "結いPlace — 점술 감정", "e3": "Sacred Abyss Japan — 영어 감정서", "e4": "Japan in 60 — 일본의 명소를 둘러보다", "e5": "번역의 언어학 해체신서", "e6": "세계 절경 연구소", "e7": "japanin.net — 여행 가이드", "e8": "구형 가전 연구소", "e9": "구형 가젯 비교소", "e10": "해외 SIM·eSIM 비교 가이드", "e11": "직전 호텔 특가 내비", "e12": "일본어를 영어로 말하면 — 해체신서", "e13": "Backstory of Japan — 일본 사건의 배경", "e14": "Beyond the Guidebook — 영어 전자책", "e15": "업무를 덜어 주는 도구 — OCR·동영상 제작", "codex": "개요", "entity": "개인사업 — 상호 Sacred Abyss", "biz": "위와 같음", "foot": "기재되지 않은 항목은 쓸 수 없는 것이 아니라, 쓰지 않기로 한 것입니다."}};
+    var DESC = {
+        'ja': 'Sacred Abyss｜正体不明。事業は明快。',
+        'en': 'Sacred Abyss | Of unknown nature. Clear in its works.',
+        'zh-Hans': 'Sacred Abyss｜来历不明，事业明确。',
+        'zh-Hant': 'Sacred Abyss｜來歷不明，事業明確。',
+        'ko': 'Sacred Abyss｜정체불명. 사업은 명확.'
+    };
+    var KEY = 'sa-lang';
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) nodes[i].setAttribute('data-ja', nodes[i].textContent);
+
+    function pick() {
+        try { var s = localStorage.getItem(KEY); if (s && DICT[s]) return s; } catch (e) {}
+        var langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'ja']);
+        for (var j = 0; j < langs.length; j++) {
+            var l = String(langs[j]).toLowerCase();
+            if (l.indexOf('ja') === 0) return 'ja';
+            if (l.indexOf('ko') === 0) return 'ko';
+            if (l.indexOf('zh') === 0) return /hant|tw|hk|mo/.test(l) ? 'zh-Hant' : 'zh-Hans';
+            if (l.indexOf('en') === 0) return 'en';
+        }
+        return 'en';
+    }
+    function apply(lang) {
+        var d = DICT[lang] || DICT.ja;
+        for (var i = 0; i < nodes.length; i++) {
+            var k = nodes[i].getAttribute('data-i18n');
+            nodes[i].textContent = lang === 'ja' ? nodes[i].getAttribute('data-ja') : (d[k] !== undefined ? d[k] : nodes[i].getAttribute('data-ja'));
+        }
+        document.documentElement.setAttribute('lang', lang);
+        var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', DESC[lang] || DESC.ja);
+        var bs = document.querySelectorAll('.langs button');
+        for (var b = 0; b < bs.length; b++) bs[b].setAttribute('aria-current', bs[b].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    var bs = document.querySelectorAll('.langs button');
+    for (var b = 0; b < bs.length; b++) {
+        bs[b].addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var l = this.getAttribute('data-lang');
+            try { localStorage.setItem(KEY, l); } catch (e) {}
+            apply(l);
+        });
+    }
+    apply(pick());
+})();
+
 </script>
 
 </body>
