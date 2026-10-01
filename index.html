@@ -152,7 +152,7 @@ body {
 
 .rail-right { text-align: right; }
 
-.rail-right p:last-child {
+.rail-right p:last-of-type {
     font-size: clamp(0.62rem, 1.15vmin, 0.78rem);
     color: var(--bone);
     margin: 7px 0 0;
@@ -457,11 +457,38 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
         order: -1;
     }
     .creed { font-size: clamp(1.05rem, 4.6vw, 1.5rem); }
-    .creed-en, .asks li, .entry .name, .cell dd, .rail-right p:last-child { font-size: 0.82rem; }
+    .creed-en, .asks li, .entry .name, .cell dd, .rail-right p:last-of-type { font-size: 0.82rem; }
     .panel-head h2, .codex-head h2 { font-size: 0.92rem; }
     .rail .name-en { font-size: clamp(1.4rem, 7vw, 2.1rem); }
     .codex .note { margin-left: 0; text-align: left; flex-basis: 100%; }
 }
+
+/* 2026-10-01 事業の見出しの横に添える未解読の文字(本文の文字列と同じ drawGlyph) */
+.group-label .glyph-tag { display: inline-block; opacity: 0.5; margin-left: 4px; vertical-align: middle; }
+
+/* 概要のメール */
+.cell dd a.mail { color: var(--bone); text-decoration: none; border-bottom: 1px solid rgba(201, 162, 39, 0.45); }
+.cell dd a.mail:hover, .cell dd a.mail:focus-visible { color: var(--gold-pale); border-bottom-color: var(--gold); }
+
+/* BGM の切り替え(右上の帯)。音は既定で流す。ブラウザが自動再生を止めたときは、最初の操作で流し始める */
+.bgm-toggle {
+    margin-top: clamp(4px, 0.8vmin, 9px);
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; border: 1px solid rgba(201, 162, 39, 0.45); border-radius: 2px;
+    padding: 3px 10px; cursor: pointer;
+    font-family: var(--mono); font-size: clamp(0.48rem, 0.9vmin, 0.62rem); letter-spacing: 0.18em;
+    color: var(--dim); text-transform: uppercase;
+    transition: border-color 180ms ease, color 180ms ease;
+}
+.bgm-toggle:hover, .bgm-toggle:focus-visible { border-color: var(--gold); color: var(--bone); }
+.bgm-toggle .bgm-state { color: var(--dim); }
+.bgm-toggle[aria-pressed="true"] .bgm-state { color: var(--gold); }
+.bgm-mark { display: inline-flex; gap: 2px; align-items: flex-end; height: 9px; }
+.bgm-mark::before, .bgm-mark::after { content: ""; width: 2px; background: var(--gold); height: 3px; }
+.bgm-toggle[aria-pressed="true"] .bgm-mark::before { animation: bgm-bar 0.9s ease-in-out infinite alternate; }
+.bgm-toggle[aria-pressed="true"] .bgm-mark::after { animation: bgm-bar 0.9s ease-in-out -0.45s infinite alternate; }
+@keyframes bgm-bar { from { height: 2px; } to { height: 9px; } }
+@media (prefers-reduced-motion: reduce) { .bgm-toggle .bgm-mark::before, .bgm-toggle .bgm-mark::after { animation: none; } }
 </style>
 </head>
 <body>
@@ -479,6 +506,10 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
         <div class="rail-right">
             <p class="tag">Nihil Explicatur</p>
             <p>この会社が何を目的にしているのかは、ここには書かれていません。</p>
+            <button type="button" id="bgm-toggle" class="bgm-toggle" aria-pressed="false" aria-label="BGM の再生と停止">
+                <span class="bgm-mark" aria-hidden="true"></span><span class="bgm-label">Sonus</span><span class="bgm-state">OFF</span>
+            </button>
+            <audio id="bgm" src="assets/sacred-void.mp3" loop preload="none"></audio>
         </div>
     </header>
 
@@ -530,14 +561,14 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
 
             <div class="opus">
         <div>
-            <div class="group-label"><span class="jp">物販</span><span class="count">01</span></div>
+            <div class="group-label"><span class="jp">物販</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="2203" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
             <a class="entry" href="https://www.onicard.net/" target="_blank" rel="noopener">
                 <span class="name">onicard — トレーディングカード専門店</span>
                 <span class="where">Shop</span>
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">占術</span><span class="count">02</span></div>
+            <div class="group-label"><span class="jp">占術</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="3307" data-size="10" aria-hidden="true"></canvas><span class="count">02</span></div>
             <a class="entry" href="https://yuiplace.base.shop/" target="_blank" rel="noopener">
                 <span class="name">結いPlace — 占い鑑定</span>
                 <span class="where">Japan</span>
@@ -548,7 +579,7 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">映像</span><span class="count">04</span></div>
+            <div class="group-label"><span class="jp">映像</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="4409" data-size="10" aria-hidden="true"></canvas><span class="count">04</span></div>
             <a class="entry" href="https://www.youtube.com/@japanin60-c8m" target="_blank" rel="noopener">
                 <span class="name">Japan in 60 — 日本の名所を巡る</span>
                 <span class="where">YouTube</span>
@@ -567,7 +598,7 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">記事</span><span class="count">05</span></div>
+            <div class="group-label"><span class="jp">記事</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="5501" data-size="10" aria-hidden="true"></canvas><span class="count">05</span></div>
             <a class="entry" href="https://magicaidrop.hatenablog.com/" target="_blank" rel="noopener">
                 <span class="name">型落ち家電ラボ</span>
                 <span class="where">Blog</span>
@@ -590,7 +621,7 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </a>
         </div>
         <div>
-            <div class="group-label"><span class="jp">出版</span><span class="count">03</span></div>
+            <div class="group-label"><span class="jp">出版</span><canvas class="glyphs glyph-tag" data-glyphs="3" data-seed="6607" data-size="10" aria-hidden="true"></canvas><span class="count">03</span></div>
             <a class="entry" href="https://note.com/backstory_jp" target="_blank" rel="noopener">
                 <span class="name">日本語、英語で言うと — 解体新書</span>
                 <span class="where">note</span>
@@ -605,7 +636,7 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             </div>
         </div>
         <div>
-            <div class="group-label"><span class="jp">道具</span><span class="count">01</span></div>
+            <div class="group-label"><span class="jp">道具</span><canvas class="glyphs glyph-tag" data-glyphs="4" data-seed="7703" data-size="10" aria-hidden="true"></canvas><span class="count">01</span></div>
             <a class="entry" href="https://sacredabyss.booth.pm/" target="_blank" rel="noopener">
                 <span class="name">業務を軽くする道具 — OCR・動画作成</span>
                 <span class="where">BOOTH</span>
@@ -630,6 +661,7 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
             <dl class="cell"><dt>Location</dt><dd class="void">—</dd></dl>
             <dl class="cell"><dt>Founded</dt><dd class="void">—</dd></dl>
             <dl class="cell"><dt>Business</dt><dd>上記のとおり</dd></dl>
+            <dl class="cell"><dt>Contact</dt><dd><a class="mail" href="mailto:sa-void@sacred-abyss.com">SA-Void@Sacred-Abyss.com</a></dd></dl>
             <p class="note">記載のない項目は、書けないのではなく、書かないことにしています。<br>&copy; 2026 Sacred Abyss</p>
         </div>
     </footer>
@@ -1052,6 +1084,69 @@ function drawGlyph(ctx, x, y, s, rnd) {
 
     resize();
     if (!still) { running = true; requestAnimationFrame(loop); }
+})();
+
+/* ==================================================================
+   BGM(2026-10-01 社長「BGMを設定してループして流れるように、ONとOFFできるように」)
+   既定は流す。ただしブラウザは音の自動再生を止めることが多いので、
+   止められたら画面への最初の操作(クリック・キー)で流し始める。
+   OFF にした人は、次に来たときも OFF のまま(この端末だけの覚え書き)。
+   ================================================================== */
+(function bgm() {
+    var audio = document.getElementById('bgm');
+    var btn = document.getElementById('bgm-toggle');
+    if (!audio || !btn) return;
+    var KEY = 'sa-bgm';
+    var TARGET = 0.5;
+    var wantOn = true;
+    try { if (localStorage.getItem(KEY) === 'off') wantOn = false; } catch (e) {}
+
+    function show(on) {
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.querySelector('.bgm-state').textContent = on ? 'ON' : 'OFF';
+    }
+    function fadeTo(v, done) {
+        var step = (v - audio.volume) / 20, k = 0;
+        var t = setInterval(function () {
+            k++;
+            audio.volume = Math.max(0, Math.min(1, audio.volume + step));
+            if (k >= 20) { clearInterval(t); audio.volume = v; if (done) done(); }
+        }, 40);
+    }
+    function play() {
+        audio.volume = 0;
+        var p = audio.play();
+        if (p && p.then) {
+            return p.then(function () { show(true); fadeTo(TARGET); return true; })
+                    .catch(function () { show(false); return false; });
+        }
+        show(true); fadeTo(TARGET);
+        return Promise.resolve(true);
+    }
+    function stop() { fadeTo(0, function () { audio.pause(); }); show(false); }
+    function remember(on) { try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) {} }
+
+    btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (audio.paused) { remember(true); wantOn = true; play(); }
+        else { remember(false); wantOn = false; stop(); }
+    });
+
+    show(false);
+    if (!wantOn) return;
+    play().then(function (ok) {
+        if (ok) return;
+        // 自動再生を止められた → 最初の操作で流す
+        var once = function (ev) {
+            // ボタン自体を押したときはボタンの処理に任せる(ここで流すと、直後のクリックで止まってしまう)
+            if (ev && ev.target && btn.contains(ev.target)) return;
+            document.removeEventListener('pointerdown', once, true);
+            document.removeEventListener('keydown', once, true);
+            if (wantOn && audio.paused) play();
+        };
+        document.addEventListener('pointerdown', once, true);
+        document.addEventListener('keydown', once, true);
+    });
 })();
 </script>
 
