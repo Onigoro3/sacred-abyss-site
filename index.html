@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sacred Abyss</title>
+<meta name="description" content="Sacred Abyss｜正体不明。事業は明快。">
+<meta property="og:title" content="Sacred Abyss">
+<meta property="og:description" content="正体不明。事業は明快。">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/sa-monogram.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Serif+JP:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ------------------------------------------------------------------
+   Sacred Abyss 公式サイト
+
+   1画面で完結する石板。スクロールさせない。
+   中央の魔法陣を主役に、その背後の板に未解読の文字を刻み、
+   理念・事業・概要を板の面に埋め込む。
+
+   単一テーマ(深淵)で確定。閲覧側のダーク/ライト設定には追従させない。
+   深淵に沈む会社が閲覧環境次第で白くなるのは理念に反するため、
+   背景も文字色も全てトークンから明示的に塗る。
+   ------------------------------------------------------------------ */
+:root {
+    --abyss:      #04050a;   /* 地。純黒ではなく僅かに青へ寄せた闇 */
+    --abyss-edge: #1a2030;   /* 刻線・境界 */
+    --gold:       #c9a227;   /* ロゴの金 */
+    --gold-pale:  #e4ce8f;   /* 金の淡い側。暗所での可読性はこちらが担う */
+    --bone:       #f1ede2;   /* 白。画面の純白ではなく骨と羊皮紙の白 */
+    --dim:        #7c8398;   /* 地の青みに寄せた中間色 */
+
+    --serif-en: "Cormorant Garamond", "Times New Roman", serif;
+    --serif-jp: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+    --mono:     "JetBrains Mono", "Consolas", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    /* 1画面で完結させる。狭い画面だけ下の media query で例外的に送る */
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    background: var(--abyss);
+    color: var(--bone);
+    font-family: var(--serif-jp);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+    outline: 2px solid var(--gold-pale);
+    outline-offset: 3px;
+}
+
+/* 板に刻まれた未解読の文字。全面に敷く */
+#tablet {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+}
+
+/* 金の粒子。板の上、文字の下を漂う */
+#veil {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    display: block;
+}
+
+/* ---------------- 板の枠と全体の骨格 ---------------- */
+.plate {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: clamp(14px, 2.2vmin, 26px);
+    gap: clamp(10px, 1.6vmin, 22px);
+}
+
+/* 板の縁。二重の刻線で石板らしくする */
+.plate::before {
+    content: "";
+    position: absolute;
+    inset: clamp(8px, 1.3vmin, 15px);
+    border: 1px solid rgba(201, 162, 39, 0.30);
+    pointer-events: none;
+}
+
+.plate::after {
+    content: "";
+    position: absolute;
+    inset: clamp(13px, 2.1vmin, 24px);
+    border: 1px solid rgba(201, 162, 39, 0.11);
+    pointer-events: none;
+}
+
+/* 板に彫られた文字は、背後の刻線から浮かせて読ませる */
+.plate * { text-shadow: 0 0 14px rgba(4, 5, 10, 0.96), 0 0 4px rgba(4, 5, 10, 0.9); }
+
+/* 英語は札(ラベル)の層、日本語は中身の層。訳を並べるのではなく役割で分ける */
+.tag {
+    font-family: var(--mono);
+    font-size: clamp(0.52rem, 1.05vmin, 0.66rem);
+    font-weight: 500;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0;
+}
+
+/* ---------------- 上の帯 ---------------- */
+.rail {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: clamp(6px, 1.4vmin, 16px) clamp(14px, 3vmin, 40px) 0;
+}
+
+.rail .name-en {
+    font-family: var(--serif-en);
+    font-weight: 300;
+    font-size: clamp(1.15rem, 3.1vmin, 2.1rem);
+    letter-spacing: 0.26em;
+    margin: 0 0 0 0.26em;
+    color: var(--bone);
+    line-height: 1;
+}
+
+.rail .name-jp {
+    font-family: var(--mono);
+    font-size: clamp(0.5rem, 0.95vmin, 0.62rem);
+    letter-spacing: 0.42em;
+    color: var(--dim);
+    margin: 6px 0 0 0.42em;
+}
+
+.rail-right { text-align: right; }
+
+.rail-right p:last-child {
+    font-size: clamp(0.62rem, 1.15vmin, 0.78rem);
+    color: var(--bone);
+    margin: 7px 0 0;
+    letter-spacing: 0.07em;
+    line-height: 1.7;
+}
+
+/* ---------------- 中段: 理念 / 魔法陣 / 事業 ---------------- */
+.field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(16px, 3vmin, 48px);
+    padding: 0 clamp(14px, 3vmin, 40px);
+    min-height: 0;
+}
+
+.panel { min-width: 0; }
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: clamp(6px, 1.1vmin, 11px);
+    margin-bottom: clamp(10px, 1.8vmin, 20px);
+    border-bottom: 1px solid var(--abyss-edge);
+}
+
+.panel-head h2 {
+    font-weight: 500;
+    font-size: clamp(0.74rem, 1.45vmin, 0.98rem);
+    letter-spacing: 0.24em;
+    margin: 0;
+    color: var(--bone);
+}
+
+.panel-head .rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold) 0%, rgba(201, 162, 39, 0) 100%);
+}
+
+.panel-right .panel-head .rule {
+    background: linear-gradient(270deg, var(--gold) 0%, rgba(201, 162, 39, 0) 100%);
+}
+
+/* 未解読の文字。実在するどの文字体系でもない、この会社のための記号 */
+.glyphs { display: block; max-width: 100%; height: auto; }
+
+.creed {
+    font-weight: 300;
+    font-size: clamp(0.94rem, 2.15vmin, 1.5rem);
+    line-height: 2.05;
+    letter-spacing: 0.09em;
+    margin: clamp(12px, 2vmin, 22px) 0 0;
+    color: var(--bone);
+    text-wrap: balance;
+}
+
+.creed em { font-style: normal; color: var(--gold-pale); }
+
+.creed-en {
+    font-family: var(--serif-en);
+    font-style: italic;
+    font-size: clamp(0.72rem, 1.35vmin, 0.95rem);
+    line-height: 1.65;
+    color: var(--dim);
+    margin: clamp(9px, 1.5vmin, 16px) 0 0;
+    max-width: 32em;
+}
+
+.asks {
+    list-style: none;
+    padding: 0;
+    margin: clamp(12px, 2vmin, 22px) 0 0;
+    display: grid;
+    gap: clamp(4px, 0.8vmin, 9px);
+}
+
+.asks li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 11px;
+    align-items: baseline;
+    font-size: clamp(0.62rem, 1.15vmin, 0.79rem);
+    line-height: 1.65;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+}
+
+.asks li::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    transform: rotate(45deg) translateY(-1px);
+    background: var(--gold);
+}
+
+.sealed {
+    margin: clamp(11px, 1.9vmin, 20px) 0 0;
+    padding-top: clamp(9px, 1.6vmin, 17px);
+    border-top: 1px solid var(--abyss-edge);
+}
+
+.sealed .glyphs { opacity: 0.44; }
+
+.sealed p {
+    font-size: clamp(0.58rem, 1.05vmin, 0.73rem);
+    color: var(--dim);
+    letter-spacing: 0.07em;
+    margin: 9px 0 0;
+    line-height: 1.6;
+}
+
+/* ---------------- 魔法陣 ---------------- */
+.sigil {
+    position: relative;
+    width: clamp(190px, 34vmin, 372px);
+    height: clamp(190px, 34vmin, 372px);
+    display: grid;
+    place-items: center;
+    animation: emerge 1200ms ease-out both;
+}
+
+.ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: turn 150s linear infinite;
+}
+
+.ring.counter { animation-duration: 96s; animation-direction: reverse; }
+
+@keyframes turn { to { transform: rotate(360deg); } }
+
+.mark {
+    position: relative;
+    width: 46%;
+    height: auto;
+    filter: drop-shadow(0 0 34px rgba(201, 162, 39, 0.34));
+}
+
+@keyframes emerge {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sigil { animation: none; }
+    .ring { animation: none; }
+}
+
+/* ---------------- 事業 ---------------- */
+.opus {
+    display: grid;
+    gap: clamp(7px, 1.3vmin, 15px);
+}
+
+.group-label {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    margin-bottom: clamp(2px, 0.5vmin, 5px);
+}
+
+.group-label .jp {
+    font-size: clamp(0.56rem, 1.02vmin, 0.71rem);
+    letter-spacing: 0.2em;
+    color: var(--bone);
+}
+
+.group-label .count {
+    font-family: var(--mono);
+    font-size: clamp(0.48rem, 0.9vmin, 0.6rem);
+    color: var(--dim);
+    margin-left: auto;
+}
+
+.entry {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: clamp(2px, 0.55vmin, 5px) 0;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(26, 32, 48, 0.6);
+    transition: border-color 180ms ease;
+}
+
+a.entry:hover, a.entry:focus-visible { border-bottom-color: var(--gold); }
+
+.entry .name {
+    font-size: clamp(0.66rem, 1.2vmin, 0.85rem);
+    letter-spacing: 0.05em;
+    color: var(--bone);
+    line-height: 1.7;
+}
+
+a.entry:hover .name { color: var(--gold-pale); }
+
+.entry .where {
+    font-family: var(--mono);
+    font-size: clamp(0.46rem, 0.86vmin, 0.58rem);
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+a.entry .where::after { content: " ↗"; color: var(--gold); }
+
+/* 2026-10-01 事業が13件→16件に増え、高さ900px以下の画面で下の帯に重なった。
+   低い画面だけ行の詰め方を締めて1画面に収める(広い画面の見え方は変えない) */
+@media (max-height: 900px) {
+    .opus { gap: clamp(4px, 0.8vmin, 9px); }
+    .entry { padding: 0; }
+    .entry .name { line-height: 1.5; }
+    .group-label { margin-bottom: 0; }
+}
+
+/* ---------------- 下の帯: 概要 ---------------- */
+.codex {
+    padding: 0 clamp(14px, 3vmin, 40px) clamp(6px, 1.4vmin, 16px);
+}
+
+.codex-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: clamp(5px, 1vmin, 10px);
+    border-bottom: 1px solid var(--abyss-edge);
+}
+
+.codex-head h2 {
+    font-weight: 500;
+    font-size: clamp(0.7rem, 1.35vmin, 0.92rem);
+    letter-spacing: 0.24em;
+    margin: 0;
+    color: var(--bone);
+}
+
+.codex-head .rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold) 0%, rgba(201, 162, 39, 0) 100%);
+}
+
+.record {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(12px, 2.6vmin, 40px);
+    margin: clamp(9px, 1.6vmin, 17px) 0 0;
+    align-items: baseline;
+}
+
+.cell dt {
+    font-family: var(--mono);
+    font-size: clamp(0.44rem, 0.84vmin, 0.56rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 3px;
+}
+
+.cell dd {
+    margin: 0;
+    font-size: clamp(0.62rem, 1.15vmin, 0.8rem);
+    letter-spacing: 0.05em;
+    color: var(--bone);
+    line-height: 1.5;
+}
+
+/* 空欄は不足ではなく、そう決めた結果であることを色で示す */
+.cell dd.void { color: var(--gold); font-family: var(--mono); }
+
+.codex .note {
+    margin-left: auto;
+    font-size: clamp(0.54rem, 1vmin, 0.7rem);
+    color: var(--dim);
+    letter-spacing: 0.06em;
+    text-align: right;
+    line-height: 1.6;
+}
+
+/* ---------------- 画面が足りないとき ---------------- */
+/* 1画面で完結させる構成だが、この寸法では文字が読める大きさに収まらない。
+   潰して読めなくするより、この場合だけ縦に積んで送れるようにする */
+@media (max-width: 1000px), (max-height: 620px) {
+    html, body { overflow: auto; height: auto; }
+    .plate { height: auto; min-height: 100%; }
+    .field {
+        grid-template-columns: minmax(0, 1fr);
+        gap: clamp(28px, 6vw, 48px);
+        padding-top: clamp(24px, 5vw, 40px);
+        padding-bottom: clamp(24px, 5vw, 40px);
+    }
+    .sigil {
+        width: min(74vw, 340px);
+        height: min(74vw, 340px);
+        margin: 0 auto;
+        order: -1;
+    }
+    .creed { font-size: clamp(1.05rem, 4.6vw, 1.5rem); }
+    .creed-en, .asks li, .entry .name, .cell dd, .rail-right p:last-child { font-size: 0.82rem; }
+    .panel-head h2, .codex-head h2 { font-size: 0.92rem; }
+    .rail .name-en { font-size: clamp(1.4rem, 7vw, 2.1rem); }
+    .codex .note { margin-left: 0; text-align: left; flex-basis: 100%; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="tablet" aria-hidden="true"></canvas>
+<canvas id="veil" aria-hidden="true"></canvas>
+
+<div class="plate">
+
+    <header class="rail">
+        <div>
+            <h1 class="name-en">SACRED ABYSS</h1>
+            <p class="name-jp">セイクリッド アビス</p>
+        </div>
+        <div class="rail-right">
+            <p class="tag">Nihil Explicatur</p>
+            <p>この会社が何を目的にしているのかは、ここには書かれていません。</p>
+        </div>
+    </header>
+
+    <div class="field">
+
+        <section class="panel panel-left">
+            <div class="panel-head">
+                <p class="tag">Credo</p>
+                <h2>企業理念</h2>
+                <span class="rule"></span>
+            </div>
+
+            <canvas class="glyphs" data-glyphs="11" data-seed="1341" data-size="30" aria-hidden="true"></canvas>
+
+            <p class="creed">
+                深淵にいるはずなのに、<br>
+                <em>神聖なものを生み続ける。</em>
+            </p>
+
+            <p class="creed-en">
+                Something that should not be able to make anything beautiful,
+                making beautiful things without stopping.
+            </p>
+
+            <ul class="asks">
+                <li>何を目的に運営されているのか</li>
+                <li>何を目的に、これほど幅の広いコンテンツを出しているのか</li>
+                <li>何を目的に、良質なサービスを出し続けるのか</li>
+            </ul>
+
+            <div class="sealed">
+                <canvas class="glyphs" data-glyphs="8" data-seed="7717" data-size="22" aria-hidden="true"></canvas>
+                <p>この三つに対する答えは、まだ訳されていません。</p>
+            </div>
+        </section>
+
+        <div class="sigil">
+            <canvas class="ring" data-ring="outer" aria-hidden="true"></canvas>
+            <canvas class="ring counter" data-ring="inner" aria-hidden="true"></canvas>
+            <img class="mark" src="assets/sa-monogram.png" alt="Sacred Abyss">
+        </div>
+
+        <section class="panel panel-right">
+            <div class="panel-head">
+                <p class="tag">Opus</p>
+                <h2>事業</h2>
+                <span class="rule"></span>
+            </div>
+
+            <div class="opus">
+        <div>
+            <div class="group-label"><span class="jp">物販</span><span class="count">01</span></div>
+            <a class="entry" href="https://www.onicard.net/" target="_blank" rel="noopener">
+                <span class="name">onicard — トレーディングカード専門店</span>
+                <span class="where">Shop</span>
+            </a>
+        </div>
+        <div>
+            <div class="group-label"><span class="jp">占術</span><span class="count">02</span></div>
+            <a class="entry" href="https://yuiplace.base.shop/" target="_blank" rel="noopener">
+                <span class="name">結いPlace — 占い鑑定</span>
+                <span class="where">Japan</span>
+            </a>
+            <a class="entry" href="https://www.etsy.com/shop/SacredAbyssJapan" target="_blank" rel="noopener">
+                <span class="name">Sacred Abyss Japan — 英語の鑑定書</span>
+                <span class="where">Etsy</span>
+            </a>
+        </div>
+        <div>
+            <div class="group-label"><span class="jp">映像</span><span class="count">04</span></div>
+            <a class="entry" href="https://www.youtube.com/@japanin60-c8m" target="_blank" rel="noopener">
+                <span class="name">Japan in 60 — 日本の名所を巡る</span>
+                <span class="where">YouTube</span>
+            </a>
+            <a class="entry" href="https://www.youtube.com/@honyaku_kaitai" target="_blank" rel="noopener">
+                <span class="name">翻訳の言語学 解体新書</span>
+                <span class="where">YouTube</span>
+            </a>
+            <a class="entry" href="https://www.youtube.com/@sekainozekkei" target="_blank" rel="noopener">
+                <span class="name">世界の絶景研究所</span>
+                <span class="where">YouTube</span>
+            </a>
+            <a class="entry" href="https://japanin.net/" target="_blank" rel="noopener">
+                <span class="name">japanin.net — 旅行ガイド</span>
+                <span class="where">Web</span>
+            </a>
+        </div>
+        <div>
+            <div class="group-label"><span class="jp">記事</span><span class="count">05</span></div>
+            <a class="entry" href="https://magicaidrop.hatenablog.com/" target="_blank" rel="noopener">
+                <span class="name">型落ち家電ラボ</span>
+                <span class="where">Blog</span>
+            </a>
+            <a class="entry" href="https://kataochi-gadget-hikakusho.hatenablog.com/" target="_blank" rel="noopener">
+                <span class="name">型落ちガジェット比較所</span>
+                <span class="where">Blog</span>
+            </a>
+            <a class="entry" href="https://magicaidemon.hatenablog.com/" target="_blank" rel="noopener">
+                <span class="name">海外SIM・eSIM比較ガイド</span>
+                <span class="where">Blog</span>
+            </a>
+            <a class="entry" href="https://magicaitravel.hatenablog.com/" target="_blank" rel="noopener">
+                <span class="name">直前ホテル特価ナビ</span>
+                <span class="where">Blog</span>
+            </a>
+            <a class="entry" href="https://magicaivenus.hatenablog.com/" target="_blank" rel="noopener">
+                <span class="name">Relax Venus</span>
+                <span class="where">Blog</span>
+            </a>
+        </div>
+        <div>
+            <div class="group-label"><span class="jp">出版</span><span class="count">03</span></div>
+            <a class="entry" href="https://note.com/backstory_jp" target="_blank" rel="noopener">
+                <span class="name">日本語、英語で言うと — 解体新書</span>
+                <span class="where">note</span>
+            </a>
+            <a class="entry" href="https://backstoryofjapan.substack.com/" target="_blank" rel="noopener">
+                <span class="name">Backstory of Japan — 日本の出来事の背景</span>
+                <span class="where">Substack</span>
+            </a>
+            <div class="entry">
+                <span class="name">Beyond the Guidebook — 英語の電子書籍</span>
+                <span class="where">Kindle</span>
+            </div>
+        </div>
+        <div>
+            <div class="group-label"><span class="jp">道具</span><span class="count">01</span></div>
+            <a class="entry" href="https://sacredabyss.booth.pm/" target="_blank" rel="noopener">
+                <span class="name">業務を軽くする道具 — OCR・動画作成</span>
+                <span class="where">BOOTH</span>
+            </a>
+        </div>
+    </div>
+            </section>
+
+    </div>
+
+    <footer class="codex">
+        <div class="codex-head">
+            <p class="tag">Codex</p>
+            <h2>概要</h2>
+            <span class="rule"></span>
+        </div>
+
+        <div class="record">
+            <dl class="cell"><dt>Name</dt><dd>Sacred Abyss</dd></dl>
+            <dl class="cell"><dt>Entity</dt><dd>個人事業 — 屋号 Sacred Abyss</dd></dl>
+            <dl class="cell"><dt>Founder</dt><dd class="void">—</dd></dl>
+            <dl class="cell"><dt>Location</dt><dd class="void">—</dd></dl>
+            <dl class="cell"><dt>Founded</dt><dd class="void">—</dd></dl>
+            <dl class="cell"><dt>Business</dt><dd>上記のとおり</dd></dl>
+            <p class="note">記載のない項目は、書けないのではなく、書かないことにしています。<br>&copy; 2026 Sacred Abyss</p>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+/* ==================================================================
+   1. 未解読の文字
+   実在するどの文字体系でもない記号を、種から決まる規則で描く。
+   毎回同じ種を渡すので、再読み込みしても同じ字面になる。
+   ルーン文字など実在の文字は使わない(結いPlaceのルーン占いと混同されるため)。
+   ================================================================== */
+function seededRandom(seed) {
+    var a = seed >>> 0;
+    return function () {
+        a = (a + 0x6D2B79F5) | 0;
+        var t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+/* 1文字を描く。3×4の節点を線で結び、環と点を添える。
+   直線だけだと図形に見えるので、弧と環を混ぜて「文字」に寄せる */
+function drawGlyph(ctx, x, y, s, rnd) {
+    var cols = 3, rows = 4;
+    var node = function (c, r) {
+        return [x + (c / (cols - 1)) * s, y + (r / (rows - 1)) * s];
+    };
+
+    ctx.lineWidth = Math.max(0.8, s * 0.055);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 縦の背骨。多くの文字が持つ
+    if (rnd() < 0.72) {
+        var c0 = Math.floor(rnd() * cols);
+        var top = node(c0, 0), bot = node(c0, rows - 1);
+        ctx.beginPath();
+        ctx.moveTo(top[0], top[1]);
+        ctx.lineTo(bot[0], bot[1]);
+        ctx.stroke();
+    }
+
+    // 節点を結ぶ画
+    var strokes = 2 + Math.floor(rnd() * 3);
+    for (var i = 0; i < strokes; i++) {
+        var a = node(Math.floor(rnd() * cols), Math.floor(rnd() * rows));
+        var b = node(Math.floor(rnd() * cols), Math.floor(rnd() * rows));
+        if (a[0] === b[0] && a[1] === b[1]) continue;
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        if (rnd() < 0.3) {
+            // 弧。曲がりを入れると有機的に見える
+            ctx.quadraticCurveTo(
+                (a[0] + b[0]) / 2 + (rnd() - 0.5) * s * 0.6,
+                (a[1] + b[1]) / 2 + (rnd() - 0.5) * s * 0.6,
+                b[0], b[1]
+            );
+        } else {
+            ctx.lineTo(b[0], b[1]);
+        }
+        ctx.stroke();
+    }
+
+    // 環。呪符めいた印象はこれが担う
+    if (rnd() < 0.42) {
+        var cr = node(Math.floor(rnd() * cols), Math.floor(rnd() * rows));
+        ctx.beginPath();
+        ctx.arc(cr[0], cr[1], s * (0.11 + rnd() * 0.10), 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // 点
+    if (rnd() < 0.4) {
+        var dt = node(Math.floor(rnd() * cols), Math.floor(rnd() * rows));
+        ctx.beginPath();
+        ctx.arc(dt[0], dt[1], Math.max(0.7, s * 0.035), 0, Math.PI * 2);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+    }
+}
+
+(function renderGlyphLines() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var lines = document.querySelectorAll('canvas.glyphs');
+    for (var i = 0; i < lines.length; i++) {
+        var cv = lines[i];
+        var n = parseInt(cv.dataset.glyphs, 10) || 10;
+        var s = parseInt(cv.dataset.size, 10) || 28;
+        var seed = parseInt(cv.dataset.seed, 10) || 1;
+        var gap = s * 0.62;
+        var w = n * s + (n - 1) * gap;
+        var h = s * 1.36;
+
+        cv.width = Math.round(w * dpr);
+        cv.height = Math.round(h * dpr);
+        cv.style.width = w + 'px';
+        cv.style.height = h + 'px';
+
+        var ctx = cv.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.strokeStyle = '#e4ce8f';
+
+        var rnd = seededRandom(seed);
+        for (var g = 0; g < n; g++) {
+            drawGlyph(ctx, g * (s + gap), s * 0.18, s, rnd);
+        }
+    }
+})();
+
+/* ==================================================================
+   2. 板
+   画面全面に、未解読の文字を段組みで刻む。
+   一段ごとに刻線を挟み、石板に彫った碑文のように見せる。
+   本文の背後に来るので、濃度は読解を妨げない範囲に抑える。
+   ================================================================== */
+(function renderTablet() {
+    var cv = document.getElementById('tablet');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d');
+
+    function build() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var W = cv.clientWidth, H = cv.clientHeight;
+        if (!W || !H) return;
+
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+
+        // 石の面。中心をわずかに持ち上げ、縁を落として板の厚みを出す
+        var face = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.72);
+        face.addColorStop(0, 'rgba(20, 26, 42, 0.85)');
+        face.addColorStop(1, 'rgba(4, 5, 10, 0)');
+        ctx.fillStyle = face;
+        ctx.fillRect(0, 0, W, H);
+
+        var s = Math.max(15, Math.min(26, W / 62));   // 1文字の大きさ
+        var gap = s * 0.66;
+        var lead = s * 2.35;                          // 段の高さ
+        var perRow = Math.ceil(W / (s + gap)) + 1;
+        var rows = Math.ceil(H / lead) + 1;
+        var rnd = seededRandom(31337);
+
+        for (var r = 0; r < rows; r++) {
+            var y = r * lead + s * 0.4;
+
+            // 段を仕切る刻線
+            ctx.strokeStyle = 'rgba(201, 162, 39, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, Math.round(y + s * 1.42) + 0.5);
+            ctx.lineTo(W, Math.round(y + s * 1.42) + 0.5);
+            ctx.stroke();
+
+            for (var c = 0; c < perRow; c++) {
+                var x = c * (s + gap);
+                // 所々を欠字にする。均一に埋まっていると壁紙に見える
+                if (rnd() < 0.16) continue;
+
+                // 彫り込みの影を先に、光を受けた面をその上に
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+                drawGlyph(ctx, x + 1, y + 1, s, seededRandom((r * 977 + c * 31 + 7)));
+                ctx.strokeStyle = 'rgba(201, 162, 39, 0.085)';
+                drawGlyph(ctx, x, y, s, seededRandom((r * 977 + c * 31 + 7)));
+            }
+        }
+    }
+
+    var pending = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(pending);
+        pending = setTimeout(build, 180);
+    }, { passive: true });
+
+    build();
+})();
+
+/* ==================================================================
+   3. 魔法陣
+   ロゴを未解読の文字が取り巻く。回転はCSSに任せる。
+   ================================================================== */
+(function renderRings() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function build() {
+        var rings = document.querySelectorAll('canvas.ring');
+        for (var i = 0; i < rings.length; i++) {
+            var cv = rings[i];
+            var size = Math.max(180, Math.round(cv.getBoundingClientRect().width || 320));
+            cv.width = cv.height = Math.round(size * dpr);
+
+            var ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, size, size);
+
+            var c = size / 2;
+            var outer = cv.dataset.ring === 'outer';
+            var radius = outer ? size * 0.455 : size * 0.345;
+            var count = outer ? 18 : 12;
+            var gs = outer ? size * 0.052 : size * 0.044;
+
+            // 環の線。二重にして刻印らしくする
+            ctx.strokeStyle = 'rgba(201, 162, 39, 0.34)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(c, c, radius + gs * 1.15, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(201, 162, 39, 0.16)';
+            ctx.beginPath();
+            ctx.arc(c, c, radius - gs * 0.55, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 文字を円周に沿って並べる
+            var rnd = seededRandom(outer ? 4409 : 8831);
+            ctx.strokeStyle = 'rgba(228, 206, 143, 0.62)';
+            for (var g = 0; g < count; g++) {
+                var ang = (g / count) * Math.PI * 2;
+                ctx.save();
+                ctx.translate(c + Math.cos(ang) * radius, c + Math.sin(ang) * radius);
+                ctx.rotate(ang + Math.PI / 2);
+                drawGlyph(ctx, -gs / 2, -gs / 2, gs, rnd);
+                ctx.restore();
+            }
+        }
+    }
+
+    var pending = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(pending);
+        pending = setTimeout(build, 180);
+    }, { passive: true });
+
+    build();
+})();
+
+/* ==================================================================
+   4. 金の粒子
+   魔法陣とマウスの二つに引かれ、近づいた粒だけが明るくなる。
+   ================================================================== */
+(function () {
+    var canvas = document.getElementById('veil');
+    if (!canvas || !canvas.getContext) return;
+
+    var ctx = canvas.getContext('2d');
+    var logo = document.querySelector('.mark');
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var W = 0, H = 0, dpr = 1;
+    var grains = [];
+    var pointer = null;
+
+    // 粒子の元絵。1粒ずつ影をぼかすと重いので、にじんだ点を1枚作って使い回す
+    var sprite = document.createElement('canvas');
+    var SP = 64;
+    sprite.width = sprite.height = SP;
+    (function () {
+        var s = sprite.getContext('2d');
+        var g = s.createRadialGradient(SP / 2, SP / 2, 0, SP / 2, SP / 2, SP / 2);
+        g.addColorStop(0.00, 'rgba(255, 241, 197, 1)');
+        g.addColorStop(0.18, 'rgba(228, 206, 143, 0.85)');
+        g.addColorStop(0.45, 'rgba(201, 162, 39, 0.30)');
+        g.addColorStop(1.00, 'rgba(201, 162, 39, 0)');
+        s.fillStyle = g;
+        s.fillRect(0, 0, SP, SP);
+    })();
+
+    function seed() {
+        // 画面の広さに応じて数を決める。狭い画面で描きすぎない
+        var n = Math.round(Math.min(190, Math.max(55, (W * H) / 12000)));
+        grains = [];
+        for (var i = 0; i < n; i++) {
+            grains.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.16,
+                vy: (Math.random() - 0.5) * 0.16 - 0.04, // ごく僅かに上へ
+                r: 0.6 + Math.random() * 2.2,
+                base: 0.16 + Math.random() * 0.42,
+                // 明滅の位相をばらして、全体が同時に光らないようにする
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.004 + Math.random() * 0.012,
+                halo: 0
+            });
+        }
+    }
+
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = canvas.clientWidth;
+        H = canvas.clientHeight;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        seed();
+        draw();
+    }
+
+    // 魔法陣の中心を画面座標で得る。画面外に出たら null
+    function anchor() {
+        if (!logo) return null;
+        var b = logo.getBoundingClientRect();
+        if (b.bottom < 0 || b.top > H) return null;
+        return {
+            x: b.left + b.width / 2,
+            y: b.top + b.height / 2,
+            pull: 1,
+            hold: b.width * 0.46,
+            reach: Math.min(W, H) * 0.44,
+            swirl: 0.075,
+            grip: 0.020,
+            glow: 0.55
+        };
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'lighter';
+        for (var i = 0; i < grains.length; i++) {
+            var p = grains[i];
+            var a = p.base * (0.55 + 0.45 * Math.sin(p.phase)) + p.halo;
+            var d = p.r * 9;
+            ctx.globalAlpha = Math.min(1, a);
+            ctx.drawImage(sprite, p.x - d / 2, p.y - d / 2, d, d);
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function attract(p, at) {
+        var dx = at.x - p.x, dy = at.y - p.y;
+        var dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        if (dist >= at.reach) return;
+        var f = (1 - dist / at.reach) * at.pull;
+        var ux = dx / dist, uy = dy / dist;
+        // 引き寄せは弱く、回り込みを強くする。中心に潰れず周囲を巡る
+        p.vx += ux * f * at.grip - uy * f * at.swirl;
+        p.vy += uy * f * at.grip + ux * f * at.swirl;
+        // 近づいた粒だけ明るくする＝まとわりついて見える
+        p.halo = Math.max(p.halo, f * at.glow);
+        // 内側まで入り込んだら押し返す
+        if (dist < at.hold) {
+            p.vx -= ux * (1 - dist / at.hold) * 0.16;
+            p.vy -= uy * (1 - dist / at.hold) * 0.16;
+        }
+    }
+
+    function step() {
+        var onLogo = anchor();
+
+        for (var i = 0; i < grains.length; i++) {
+            var p = grains[i];
+            p.phase += p.speed;
+
+            // 漂い。方向をゆっくり気まぐれに変える
+            p.vx += (Math.random() - 0.5) * 0.010;
+            p.vy += (Math.random() - 0.5) * 0.010;
+            p.halo *= 0.94;
+
+            if (onLogo) attract(p, onLogo);
+            if (pointer) attract(p, pointer);
+
+            // 速すぎる粒を抑える。放り出されて消えるのを防ぐ
+            p.vx *= 0.975;
+            p.vy *= 0.975;
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // 端は反対側へ回り込ませる。数が減らない
+            var m = 24;
+            if (p.x < -m) p.x = W + m; else if (p.x > W + m) p.x = -m;
+            if (p.y < -m) p.y = H + m; else if (p.y > H + m) p.y = -m;
+        }
+        draw();
+    }
+
+    var running = false;
+    function loop() {
+        if (!running) return;
+        step();
+        requestAnimationFrame(loop);
+    }
+
+    // マウスに光を集める。細かく強く引き、指で触る端末では働かせない
+    window.addEventListener('pointermove', function (e) {
+        if (e.pointerType === 'touch') return;
+        pointer = {
+            x: e.clientX,
+            y: e.clientY,
+            pull: 1,
+            hold: 26,
+            reach: Math.min(W, H) * 0.26,
+            swirl: 0.055,
+            grip: 0.055,
+            glow: 0.85
+        };
+    }, { passive: true });
+
+    window.addEventListener('pointerout', function (e) {
+        if (!e.relatedTarget) pointer = null;
+    }, { passive: true });
+
+    window.addEventListener('blur', function () { pointer = null; });
+    window.addEventListener('resize', resize, { passive: true });
+
+    // 見ていないタブで回し続けない
+    document.addEventListener('visibilitychange', function () {
+        if (still) return;
+        if (document.hidden) {
+            running = false;
+        } else if (!running) {
+            running = true;
+            requestAnimationFrame(loop);
+        }
+    });
+
+    resize();
+    if (!still) { running = true; requestAnimationFrame(loop); }
+})();
+</script>
+
+</body>
+</html>
