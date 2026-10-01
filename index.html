@@ -525,6 +525,76 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
 /* 2026-10-01 Location = 光り輝く深淵の首都「Lumvessa(ルムヴェッサ)」。ヴォイデル文字に続けて名を添える(どの言語でも同じ綴り) */
 .cell dd.place { display: inline-flex; align-items: center; gap: 8px; line-height: 1; }
 .cell dd.place .place-name { font-family: "Cormorant Garamond", serif; font-size: clamp(0.72rem, 1.3vmin, 0.95rem); letter-spacing: 0.16em; color: var(--gold-pale); }
+
+/* ==================================================================
+   2026-10-01 スマホ(社長「スマホでレスポンシブ対応して」)
+   幅1000px以下はもともと縦積み。ここでは幅640px以下の調整:
+   ・上の帯は社名の下に説明・言語・音量を左寄せで積む(横に伸びてページ幅を押し広げていた)
+   ・ボタン類は指で押せる大きさに
+   ・未解読の文字は幅に合わせて縮め、縦横比を保つ
+   ================================================================== */
+.plate { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 1000px), (max-height: 620px) {
+    .glyphs { max-width: 100%; height: auto !important; }
+    .rail .name-en { white-space: nowrap; }
+    .rail, .field, .codex { min-width: 0; }
+}
+@media (max-width: 640px) {
+    .rail { flex-direction: column; align-items: stretch; gap: 14px; padding-top: 10px; }
+    .rail .name-en { font-size: clamp(1.15rem, 6.6vw, 1.7rem); letter-spacing: 0.2em; white-space: nowrap; }
+    .rail-right { text-align: left; }
+    .rail-right p:last-of-type { font-size: 0.8rem; }
+    .bgm-row { justify-content: flex-start; flex-wrap: wrap; gap: 10px 14px; margin-top: 12px; }
+    .langs { justify-content: flex-start; flex-basis: 100%; margin-right: 0; gap: 4px 4px; }
+    .langs button { font-size: 0.72rem; padding: 7px 9px; border: 1px solid rgba(201, 162, 39, 0.25); }
+    .langs button[aria-current="true"] { border-color: var(--gold); }
+    .bgm-toggle { font-size: 0.68rem; padding: 8px 12px; }
+    #bgm-volume { width: 120px; height: 3px; }
+    #bgm-volume::-webkit-slider-thumb { width: 18px; height: 18px; }
+    #bgm-volume::-moz-range-thumb { width: 18px; height: 18px; }
+    .entry { padding: 6px 0; align-items: center; }
+    .entry .name { line-height: 1.5; }
+    .entry .where { font-size: 0.56rem; }
+    .group-label { margin-top: 6px; }
+    .record { gap: 16px 22px; }
+    .cell dd.place { flex-wrap: wrap; }
+}
+
+/* ==================================================================
+   2026-10-01 スマホ版の並び(社長「事業の中に物販とかを格納して押せば出てくる」
+   「事業の文字もヴォイデル文字に」「事業が一番下」「企業理念のすぐ下に画像」
+   「本当に何の会社か分からないように」)
+   幅1000px以下: 上の帯 → 企業理念 → 魔法陣 → 概要 → 事業(見出しはヴォイデル文字、分類はたたんで押すと開く)
+   .field を display:contents にして、中の3つを .plate の段に直接並べ、order で入れ替える
+   ================================================================== */
+.opus-glyph { display: none; }
+.group-label .caret { display: none; }
+@media (max-width: 1000px) {
+    .plate { grid-template-rows: none; grid-auto-rows: auto; }
+    .field { display: contents; }
+    .rail { order: 0; }
+    .panel-left { order: 1; padding: 0 clamp(14px, 4vw, 40px); margin-top: clamp(20px, 6vw, 40px); }
+    .sigil { order: 2; margin: clamp(28px, 8vw, 48px) auto; }
+    .codex { order: 3; }
+    .panel-right { order: 4; padding: 0 clamp(14px, 4vw, 40px) clamp(28px, 8vw, 48px); margin-top: clamp(24px, 6vw, 40px); }
+
+    .opus-word { display: none; }
+    .opus-glyph { display: inline-block; vertical-align: middle; opacity: 0.95; }
+
+    .opus .group-label {
+        cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+        padding: 12px 0; margin: 0; border-bottom: 1px solid var(--abyss-edge);
+    }
+    .opus .group-label .jp { font-size: 0.82rem; }
+    .group-label .caret {
+        display: inline-block; margin-left: 10px; width: 7px; height: 7px;
+        border-right: 1px solid var(--gold); border-bottom: 1px solid var(--gold);
+        transform: rotate(-45deg); transition: transform 180ms ease;
+    }
+    .opus > div.open .group-label .caret { transform: rotate(45deg); }
+    .opus > div:not(.open) .entry { display: none; }
+    .opus > div.open .entry { padding-left: 10px; }
+}
 </style>
 </head>
 <body>
@@ -597,7 +667,7 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
         <section class="panel panel-right">
             <div class="panel-head">
                 <p class="tag">Opus</p>
-                <h2><span data-i18n="opus">事業</span></h2>
+                <h2><span class="opus-word" data-i18n="opus">事業</span><canvas class="glyphs opus-glyph" data-glyphs="2" data-seed="6001" data-size="17" aria-label="事業" role="img"></canvas></h2>
                 <span class="rule"></span>
             </div>
 
@@ -1289,6 +1359,44 @@ function drawGlyph(ctx, x, y, s, rnd) {
     apply(pick());
 })();
 
+
+/* ==================================================================
+   スマホ版: 事業の分類をたたんで、押すと開く(パソコンでは常に全部見せる)
+   ================================================================== */
+(function opusFold() {
+    var mq = window.matchMedia('(max-width: 1000px)');
+    var groups = document.querySelectorAll('.opus > div');
+    for (var i = 0; i < groups.length; i++) {
+        (function (g) {
+            var label = g.querySelector('.group-label');
+            if (!label) return;
+            var caret = document.createElement('span');
+            caret.className = 'caret'; caret.setAttribute('aria-hidden', 'true');
+            var count = label.querySelector('.count');
+            label.insertBefore(caret, count);
+            function sync() {
+                if (mq.matches) {
+                    label.setAttribute('role', 'button');
+                    label.setAttribute('tabindex', '0');
+                    label.setAttribute('aria-expanded', g.classList.contains('open') ? 'true' : 'false');
+                } else {
+                    label.removeAttribute('role'); label.removeAttribute('tabindex'); label.removeAttribute('aria-expanded');
+                }
+            }
+            function toggle() {
+                if (!mq.matches) return;
+                g.classList.toggle('open');
+                sync();
+            }
+            label.addEventListener('click', toggle);
+            label.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); }
+            });
+            if (mq.addEventListener) mq.addEventListener('change', sync); else if (mq.addListener) mq.addListener(sync);
+            sync();
+        })(groups[i]);
+    }
+})();
 </script>
 
 </body>
