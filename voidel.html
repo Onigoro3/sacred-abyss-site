@@ -70,6 +70,7 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
 .dl { display: inline-block; margin-top: 16px; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.14em; color: var(--abyss); background: var(--gold);
     padding: 9px 16px; text-decoration: none; }
 .dl:hover { background: var(--gold-pale); }
+.lg-h { font-size: 0.8rem; color: var(--gold, #c9a227); margin: 14px 0 6px; font-weight: 500; letter-spacing: 0.1em; }
 </style>
 </head>
 <body>
@@ -107,6 +108,15 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
     </section>
 
     <section>
+        <div class="sec-head"><p class="tag">Logograms</p><h2>意味の字(漢字)</h2><span class="rule"></span></div>
+        <p class="note">漢字1字をヴォイデル文字1字で書きます。意味の部品を左右・上下・枠の中に組み合わせて作ります(試作 v0.1・小学1・2年の漢字240字ほか)。</p>
+        <h3 class="lg-h">部品</h3><div class="grid" id="lg-parts"></div>
+        <h3 class="lg-h">小学1年</h3><div class="grid" id="lg-g1"></div>
+        <h3 class="lg-h">小学2年</h3><div class="grid" id="lg-g2"></div>
+        <h3 class="lg-h">そのほか</h3><div class="grid" id="lg-x"></div>
+    </section>
+
+    <section>
         <div class="sec-head"><p class="tag">Alphabet</p><h2>アルファベット</h2><span class="rule"></span></div>
         <p class="note">英語などはつづりどおり1文字=1字で書きます。母音は母音の字、子音は「母音なし」の印つき。</p>
         <div class="grid" id="alphabet"></div>
@@ -119,7 +129,7 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
 
     <section class="type-box">
         <div class="sec-head"><p class="tag">Type</p><h2>打ってみる</h2><span class="rule"></span></div>
-        <p class="note">ローマ字で打つと、ヴォイデル文字になります(フォント Voidel)。</p>
+        <p class="note">ローマ字で打つと、ヴォイデル文字になります(フォント Voidel)。漢字を打つと意味の字になります。</p>
         <textarea id="type-in" spellcheck="false" autocomplete="off">sacred abyss  voideru</textarea>
         <div class="type-out" id="type-out"></div>
         <ul class="rules">
@@ -131,6 +141,7 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
             <li><code>shi chi tsu sha</code> … し・ち・つ・しゃ</li>
             <li><code>-</code> … のばす音</li>
             <li><code>. , ? !</code> と <code>0〜9</code> … 記号と数字</li>
+            <li><code>愛 光 深淵</code> … 漢字は意味の字(1字)</li>
         </ul>
         <a class="dl" href="assets/Voidel-Regular.ttf" download>DOWNLOAD FONT — Voidel-Regular.ttf</a>
     </section>
@@ -209,6 +220,19 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
     '0123456789'.split('').forEach(function (d) { cell(document.getElementById('signs'), [{ dg: d }], d); });
     [['period', '。'], ['comma', '、'], ['question', '?'], ['exclaim', '!']].forEach(function (p) { cell(document.getElementById('signs'), [{ sp: p[0] }], p[1]); });
 
+    // 意味の字(漢字)。部品の名前は成り立ちとして下に添える
+    var LG = window.__LG;
+    if (LG) {
+        Object.keys(LG.radicals).forEach(function (k) {
+            LG.chars['\u0000' + k] = { l: 'one', p: [k] };
+            cell(document.getElementById('lg-parts'), [{ lg: '\u0000' + k }], LG.radicals[k].m.replace(/\(.*\)/, ''));
+        });
+        var how = function (ch) { return LG.chars[ch].p.map(function (id) { return /^d\d$/.test(id) ? id.slice(1) : LG.radicals[id].m.replace(/\(.*\)/, ''); }).join('+'); };
+        var put = function (id, list) { list.forEach(function (ch) { cell(document.getElementById(id), [{ lg: ch }], ch, LG.chars[ch].l === 'one' ? '' : how(ch)); }); };
+        put('lg-g1', LG.grade1.split(''));
+        put('lg-g2', LG.grade2.split(''));
+        put('lg-x', Object.keys(LG.chars).filter(function (c) { return c[0] !== '\u0000' && LG.grade1.indexOf(c) < 0 && LG.grade2.indexOf(c) < 0; }));
+    }
     // 例・見出し
     document.querySelectorAll('canvas.v').forEach(function (cv) {
         var s = +cv.dataset.size || 26;
