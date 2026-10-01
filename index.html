@@ -1336,12 +1336,18 @@ function drawGlyph(ctx, x, y, s, rnd) {
         }
         return 'en';
     }
+    // スマホ版は事業が概要より下に来るので、概要の Business だけ「下記のとおり」に(10-01 社長)
+    var BELOW = { 'ja': '下記のとおり', 'en': 'As listed below', 'zh-Hans': '如下所列', 'zh-Hant': '如下所列', 'ko': '아래와 같음' };
+    var mqm = window.matchMedia('(max-width: 1000px)');
+    var current = 'ja';
     function apply(lang) {
+        current = lang;
         var d = DICT[lang] || DICT.ja;
         for (var i = 0; i < nodes.length; i++) {
             var k = nodes[i].getAttribute('data-i18n');
             nodes[i].textContent = lang === 'ja' ? nodes[i].getAttribute('data-ja') : (d[k] !== undefined ? d[k] : nodes[i].getAttribute('data-ja'));
         }
+        if (mqm.matches) { var bz = document.querySelector('[data-i18n="biz"]'); if (bz) bz.textContent = BELOW[lang] || BELOW.ja; }
         document.documentElement.setAttribute('lang', lang);
         var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', DESC[lang] || DESC.ja);
         var bs = document.querySelectorAll('.langs button');
@@ -1357,6 +1363,8 @@ function drawGlyph(ctx, x, y, s, rnd) {
         });
     }
     apply(pick());
+    var re = function () { apply(current); };
+    if (mqm.addEventListener) mqm.addEventListener('change', re); else if (mqm.addListener) mqm.addListener(re);
 })();
 
 
