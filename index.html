@@ -595,6 +595,11 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
     .opus > div:not(.open) .entry { display: none; }
     .opus > div.open .entry { padding-left: 10px; }
 }
+
+/* 2026-10-01 © の下に、ヴォイデル文字で小さく「ヴォイデル」。押すと文字の対応表(voidel.html)へ */
+.voidel-link { display: inline-block; margin-top: 6px; opacity: 0.75; transition: opacity 180ms ease; }
+.voidel-link:hover, .voidel-link:focus-visible { opacity: 1; }
+.voidel-link canvas { display: block; }
 </style>
 </head>
 <body>
@@ -774,7 +779,7 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
             <dl class="cell"><dt>Founded</dt><dd class="glyph-dd"><canvas class="glyphs" data-glyphs="4" data-seed="1066" data-size="13" aria-label="未解読" role="img"></canvas></dd></dl>
             <dl class="cell"><dt>Business</dt><dd><span data-i18n="biz">上記のとおり</span></dd></dl>
             <dl class="cell"><dt>Contact</dt><dd><a class="mail" href="mailto:sa-void@sacred-abyss.com">SA-Void@Sacred-Abyss.com</a></dd></dl>
-            <p class="note"><span data-i18n="foot">記載のない項目は、書けないのではなく、書かないことにしています。</span><br>&copy; 2026 Sacred Abyss</p>
+            <p class="note"><span data-i18n="foot">記載のない項目は、書けないのではなく、書かないことにしています。</span><br>&copy; 2026 Sacred Abyss<br><a class="voidel-link" href="voidel.html" aria-label="Voidel"><canvas id="voidel-link" aria-hidden="true"></canvas></a></p>
         </div>
     </footer>
 
@@ -1407,5 +1412,18 @@ function drawGlyph(ctx, x, y, s, rnd) {
 })();
 </script>
 
+<script src="assets/voidel.js"></script>
+<script>
+/* © の下の「ヴォイデル」(ヴォイデル文字で書く。正本は launch/voidel) */
+(function () {
+    var cv = document.getElementById('voidel-link'); if (!cv || !window.Voidel) return;
+    var V = window.Voidel, s = 11, gap = s * 0.55, pad = s * 0.42;
+    var units = V.fromKana('ヴォイデル');
+    var w = units.length * (s + gap) - gap + 4, h = s + pad * 2, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.strokeStyle = '#c9a227'; ctx.fillStyle = '#c9a227';
+    V.drawLine(ctx, units, 2, pad, s, gap);
+})();
+</script>
 </body>
 </html>

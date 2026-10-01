@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voidel | Sacred Abyss</title>
+<meta name="description" content="ヴォイデル文字(Voidel)の対応表。Sacred Abyss の文字。">
+<link rel="icon" href="assets/sa-monogram.png">
+<!--
+  2026-10-01 社長「文字の対応表は HP の © 2026 Sacred Abyss の下に小さくヴォイデル文字でヴォイデルと書いて、別ページに飛ばして見れるように」
+  字形と書き換えの正本は launch/voidel/script.json と voidel.js。直したら launch/voidel で python build_site.py → assets/voidel.js が更新される
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Serif+JP:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+    --abyss: #04050a; --abyss-edge: #1a2030; --gold: #c9a227; --gold-pale: #e4ce8f; --bone: #f1ede2; --dim: #7c8398;
+    --serif-en: "Cormorant Garamond", "Times New Roman", serif;
+    --serif-jp: "Noto Serif JP", serif;
+    --mono: "JetBrains Mono", "Consolas", monospace;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--abyss); color: var(--bone); font-family: var(--serif-jp); }
+body { background: radial-gradient(ellipse at 50% 0%, #0b1020 0%, #04050a 60%) fixed; }
+a { color: var(--gold-pale); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px) 64px; }
+.tag { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.34em; text-transform: uppercase; color: var(--gold); margin: 0; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--abyss-edge); padding-bottom: 18px; }
+header.top a { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-decoration: none; color: var(--dim); }
+header.top a:hover { color: var(--bone); }
+h1 { font-family: var(--serif-en); font-weight: 300; font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: 0.3em; margin: 22px 0 6px; }
+.lead { color: var(--dim); font-size: 0.9rem; line-height: 1.9; margin: 14px 0 0; max-width: 46em; }
+.title-glyph { margin-top: 10px; }
+section { margin-top: clamp(36px, 6vw, 56px); }
+.sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sec-head h2 { font-weight: 500; font-size: 1rem; letter-spacing: 0.2em; margin: 0; }
+.sec-head .rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold) 0%, rgba(201, 162, 39, 0) 100%); }
+.note { color: var(--dim); font-size: 0.8rem; line-height: 1.8; margin: -6px 0 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
+.cell { border: 1px solid var(--abyss-edge); background: rgba(10, 14, 26, 0.6); padding: 12px 6px 10px; text-align: center; }
+.cell canvas { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.cell .lt { font-family: var(--mono); font-size: 0.82rem; color: var(--gold-pale); margin-top: 8px; letter-spacing: 0.08em; }
+.cell .sub { font-size: 0.72rem; color: var(--dim); margin-top: 2px; }
+table.kana { border-collapse: collapse; width: 100%; }
+table.kana th { font-family: var(--mono); font-weight: 400; font-size: 0.72rem; color: var(--gold); letter-spacing: 0.1em; padding: 6px; }
+table.kana td { border: 1px solid var(--abyss-edge); text-align: center; padding: 8px 2px 6px; background: rgba(10, 14, 26, 0.6); }
+table.kana td.empty { background: transparent; border-color: transparent; }
+table.kana td .k { font-size: 0.78rem; color: var(--dim); margin-top: 4px; }
+table.kana td canvas { max-width: 100%; height: auto; }
+.scroll { overflow-x: auto; }
+.examples .ex { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; border-bottom: 1px solid var(--abyss-edge); padding: 14px 0; }
+.examples .ex .src { min-width: 11em; font-size: 0.95rem; }
+.examples .ex canvas, .title-glyph { max-width: 100%; height: auto; }
+.examples .ex .src small { display: block; font-family: var(--mono); font-size: 0.68rem; color: var(--dim); letter-spacing: 0.1em; margin-top: 2px; }
+footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top: 16px; color: var(--dim); font-size: 0.72rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 640px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+    table.kana td { padding: 6px 0 4px; }
+}
+@font-face { font-family: "Voidel"; src: url("assets/Voidel-Regular.ttf") format("truetype"); font-display: swap; }
+.type-box textarea { width: 100%; min-height: 64px; background: rgba(10, 14, 26, 0.8); color: var(--bone); border: 1px solid var(--abyss-edge);
+    font-family: var(--mono); font-size: 1rem; padding: 12px; resize: vertical; }
+.type-box textarea:focus { outline: 1px solid var(--gold); }
+.type-out { font-family: "Voidel"; font-size: clamp(30px, 6vw, 46px); color: var(--gold-pale); line-height: 1.7; min-height: 1.7em; margin-top: 12px;
+    font-feature-settings: "liga" 1, "calt" 1, "rlig" 1; word-break: break-all; }
+.rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 18px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 0.8rem; color: var(--dim); }
+.rules code { font-family: var(--mono); color: var(--gold-pale); }
+.dl { display: inline-block; margin-top: 16px; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.14em; color: var(--abyss); background: var(--gold);
+    padding: 9px 16px; text-decoration: none; }
+.dl:hover { background: var(--gold-pale); }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <header class="top">
+        <p class="tag">Sacred Abyss · Voidel</p>
+        <a href="./">← SACRED-ABYSS.COM</a>
+    </header>
+
+    <h1>VOIDEL</h1>
+    <canvas class="v title-glyph" data-kana="ヴォイデル" data-size="30"></canvas>
+    <p class="lead">ヴォイデル文字は、Sacred Abyss の文字です。1字が1つの音を表し、子音の字に小さな印を重ねて母音を表します。かなもアルファベットも、同じ字で書けます。<br>この文字で書かれる言葉(ヴォイデル語)の単語と文法は、これから少しずつ定めていきます。</p>
+
+    <section>
+        <div class="sec-head"><p class="tag">Consonants</p><h2>子音の字</h2><span class="rule"></span></div>
+        <p class="note">印のない字は「〜a」と読みます(例: k = か)。</p>
+        <div class="grid" id="consonants"></div>
+    </section>
+
+    <section>
+        <div class="sec-head"><p class="tag">Vowel marks</p><h2>母音の印</h2><span class="rule"></span></div>
+        <p class="note">子音の字に重ねて母音を変えます。下の斜線は「母音なし」(ん・英語の子音だけの音)、左上のはねは「ゃ・ゅ・ょ」。例は k の字。</p>
+        <div class="grid" id="marks"></div>
+    </section>
+
+    <section>
+        <div class="sec-head"><p class="tag">Vowels</p><h2>母音の字</h2><span class="rule"></span></div>
+        <div class="grid" id="vowels"></div>
+    </section>
+
+    <section>
+        <div class="sec-head"><p class="tag">Kana</p><h2>五十音</h2><span class="rule"></span></div>
+        <div class="scroll"><table class="kana" id="kana"></table></div>
+        <div class="grid" id="kana-extra" style="margin-top:10px"></div>
+    </section>
+
+    <section>
+        <div class="sec-head"><p class="tag">Alphabet</p><h2>アルファベット</h2><span class="rule"></span></div>
+        <p class="note">英語などはつづりどおり1文字=1字で書きます。母音は母音の字、子音は「母音なし」の印つき。</p>
+        <div class="grid" id="alphabet"></div>
+    </section>
+
+    <section>
+        <div class="sec-head"><p class="tag">Numerals &amp; signs</p><h2>数字と記号</h2><span class="rule"></span></div>
+        <div class="grid" id="signs"></div>
+    </section>
+
+    <section class="type-box">
+        <div class="sec-head"><p class="tag">Type</p><h2>打ってみる</h2><span class="rule"></span></div>
+        <p class="note">ローマ字で打つと、ヴォイデル文字になります(フォント Voidel)。</p>
+        <textarea id="type-in" spellcheck="false" autocomplete="off">sacred abyss  voideru</textarea>
+        <div class="type-out" id="type-out"></div>
+        <ul class="rules">
+            <li><code>ka ki ku ke ko</code> … 子音+母音で1字</li>
+            <li><code>k</code> … 子音だけ(母音なしの印)</li>
+            <li><code>kya kyu kyo</code> … ゃ・ゅ・ょ</li>
+            <li><code>kitte</code> … 同じ子音を重ねると「っ」</li>
+            <li><code>nn</code> … ん</li>
+            <li><code>shi chi tsu sha</code> … し・ち・つ・しゃ</li>
+            <li><code>-</code> … のばす音</li>
+            <li><code>. , ? !</code> と <code>0〜9</code> … 記号と数字</li>
+        </ul>
+        <a class="dl" href="assets/Voidel-Regular.ttf" download>DOWNLOAD FONT — Voidel-Regular.ttf</a>
+    </section>
+
+    <section class="examples">
+        <div class="sec-head"><p class="tag">Examples</p><h2>書いてみる</h2><span class="rule"></span></div>
+        <div class="ex"><div class="src">ヴォイデル<small>KANA</small></div><canvas class="v" data-kana="ヴォイデル" data-size="26"></canvas></div>
+        <div class="ex"><div class="src">セイクリッド アビス<small>KANA</small></div><canvas class="v" data-kana="セイクリッド アビス" data-size="26"></canvas></div>
+        <div class="ex"><div class="src">Sacred Abyss<small>ALPHABET</small></div><canvas class="v" data-latin="Sacred Abyss" data-size="26"></canvas></div>
+        <div class="ex"><div class="src">Lumvessa<small>ALPHABET</small></div><canvas class="v" data-latin="Lumvessa" data-size="26"></canvas></div>
+    </section>
+
+    <footer>
+        <span>Voidel v0.1 — 2026-10-01</span>
+        <span>&copy; 2026 Sacred Abyss</span>
+    </footer>
+</div>
+
+<script src="assets/voidel.js"></script>
+<script>
+(function () {
+    var V = window.Voidel;
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var GOLD = '#e4ce8f';
+    // 1字を描くキャンバス。印が上下にはみ出すので上下に余白をとる
+    function glyphCanvas(units, s) {
+        var cv = document.createElement('canvas');
+        paint(cv, units, s);
+        return cv;
+    }
+    function paint(cv, units, s) {
+        var gap = s * 0.55, padY = s * 0.45, padX = s * 0.3;
+        var w = 0;
+        units.forEach(function (u) { w += (u.sp === 'space') ? s * 0.9 : s + gap; });
+        w = Math.max(s, w - gap) + padX * 2;
+        var h = s + padY * 2;
+        cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR);
+        cv.style.width = w + 'px'; cv.style.height = h + 'px';
+        var ctx = cv.getContext('2d'); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        ctx.strokeStyle = GOLD; ctx.fillStyle = GOLD;
+        V.drawLine(ctx, units, padX, padY, s, gap);
+    }
+    function cell(parent, units, label, sub) {
+        var d = document.createElement('div'); d.className = 'cell';
+        d.appendChild(glyphCanvas(units, 30));
+        var l = document.createElement('div'); l.className = 'lt'; l.textContent = label; d.appendChild(l);
+        if (sub) { var sb = document.createElement('div'); sb.className = 'sub'; sb.textContent = sub; d.appendChild(sb); }
+        parent.appendChild(d);
+    }
+    var ROWKANA = { k: 'か', s: 'さ', t: 'た', n: 'な', h: 'は', m: 'ま', y: 'や', r: 'ら', w: 'わ', g: 'が', z: 'ざ', d: 'だ', b: 'ば', p: 'ぱ', v: 'ヴァ', f: 'ファ', j: 'ジャ', l: '(ら)' };
+    'bcdfghjklmnpqrstvwxyz'.split('').forEach(function (c) { cell(document.getElementById('consonants'), [{ c: c, v: 'a' }], c.toUpperCase(), ROWKANA[c] || ''); });
+    [['a', 'ka'], ['i', 'ki'], ['u', 'ku'], ['e', 'ke'], ['o', 'ko']].forEach(function (p) { cell(document.getElementById('marks'), [{ c: 'k', v: p[0] }], p[1], { a: 'か', i: 'き', u: 'く', e: 'け', o: 'こ' }[p[0]]); });
+    cell(document.getElementById('marks'), [{ c: 'k', v: null }], 'k', '母音なし');
+    cell(document.getElementById('marks'), [{ c: 'k', v: 'a', pal: true }], 'kya', 'きゃ');
+    ['a', 'i', 'u', 'e', 'o'].forEach(function (v) { cell(document.getElementById('vowels'), [{ iv: v }], v.toUpperCase(), { a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お' }[v]); });
+
+    // 五十音
+    var rows = [['', 'あいうえお'], ['k', 'かきくけこ'], ['s', 'さしすせそ'], ['t', 'たちつてと'], ['n', 'なにぬねの'], ['h', 'はひふへほ'], ['m', 'まみむめも'], ['y', 'や_ゆ_よ'], ['r', 'らりるれろ'], ['w', 'わ___を'], ['g', 'がぎぐげご'], ['z', 'ざじずぜぞ'], ['d', 'だぢづでど'], ['b', 'ばびぶべぼ'], ['p', 'ぱぴぷぺぽ']];
+    var tb = document.getElementById('kana');
+    var hd = document.createElement('tr'); hd.innerHTML = '<th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th>'; tb.appendChild(hd);
+    rows.forEach(function (r) {
+        var tr = document.createElement('tr');
+        var th = document.createElement('th'); th.textContent = r[0] ? r[0].toUpperCase() : '—'; tr.appendChild(th);
+        for (var i = 0; i < 5; i++) {
+            var ch = r[1][i], td = document.createElement('td');
+            if (ch === '_') { td.className = 'empty'; tr.appendChild(td); continue; }
+            td.appendChild(glyphCanvas(V.fromKana(ch), 24));
+            var k = document.createElement('div'); k.className = 'k'; k.textContent = ch; td.appendChild(k);
+            tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+    });
+    [['ん', 'n'], ['っ', '詰まる音'], ['ー', 'のばす音'], ['きゃ', 'kya'], ['ヴ', 'vu']].forEach(function (p) { cell(document.getElementById('kana-extra'), V.fromKana(p[0]), p[0], p[1]); });
+
+    'abcdefghijklmnopqrstuvwxyz'.split('').forEach(function (ch) { cell(document.getElementById('alphabet'), V.fromLatin(ch), ch.toUpperCase()); });
+    '0123456789'.split('').forEach(function (d) { cell(document.getElementById('signs'), [{ dg: d }], d); });
+    [['period', '。'], ['comma', '、'], ['question', '?'], ['exclaim', '!']].forEach(function (p) { cell(document.getElementById('signs'), [{ sp: p[0] }], p[1]); });
+
+    // 例・見出し
+    document.querySelectorAll('canvas.v').forEach(function (cv) {
+        var s = +cv.dataset.size || 26;
+        var units = cv.dataset.kana ? V.fromKana(cv.dataset.kana) : cv.dataset.latin ? V.fromLatin(cv.dataset.latin) : V.fromRoman(cv.dataset.roman || '');
+        paint(cv, units, s);
+    });
+    // 打ってみる(フォントで表示するだけ。中身はローマ字のまま)
+    var tin = document.getElementById('type-in'), tout = document.getElementById('type-out');
+    var sync = function () { tout.textContent = tin.value; };
+    tin.addEventListener('input', sync); sync();
+})();
+</script>
+</body>
+</html>
