@@ -213,6 +213,8 @@ body {
 }
 
 .creed em { font-style: normal; color: var(--gold-pale); }
+/* 10-02 企業理念の文に混ぜたヴォイデル文字(字の大きさに合わせる) */
+.creed .creed-glyph { display: inline-block; width: 1em; height: 1em; vertical-align: -0.12em; margin: 0 0.04em; }
 
 .creed-en {
     font-family: var(--serif-en);
@@ -1372,10 +1374,35 @@ function drawGlyph(ctx, x, y, s, rnd) {
             nodes[i].textContent = lang === 'ja' ? nodes[i].getAttribute('data-ja') : (d[k] !== undefined ? d[k] : nodes[i].getAttribute('data-ja'));
         }
         if (mqm.matches) { var bz = document.querySelector('[data-i18n="biz"]'); if (bz) bz.textContent = BELOW[lang] || BELOW.ja; }
+        if (lang === 'ja') mixCreed();
         document.documentElement.setAttribute('lang', lang);
         var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', DESC[lang] || DESC.ja);
         var bs = document.querySelectorAll('.langs button');
         for (var b = 0; b < bs.length; b++) bs[b].setAttribute('aria-current', bs[b].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    /* 10-02 社長「HPは日本語とヴォイデル語を組み合わせた感じに(名刺と同じ混ぜ方)」
+       企業理念の文の中の3字ずつをヴォイデル文字に置き換える(名刺と同じ字: 淵・い・な / 聖・の・続)。日本語のときだけ */
+    var MIX = { c1: [1, 3, 7], c2: [1, 4, 8] };
+    function mixCreed() {
+        if (!window.Voidel) return;
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        Object.keys(MIX).forEach(function (k) {
+            var node = document.querySelector('[data-i18n="' + k + '"]'); if (!node) return;
+            var text = node.getAttribute('data-ja'), cs = getComputedStyle(node);
+            var fs = parseFloat(cs.fontSize) || 24, s = fs * 0.82, color = cs.color;
+            node.textContent = '';
+            Array.prototype.forEach.call(text, function (ch, i) {
+                if (MIX[k].indexOf(i) < 0) { node.appendChild(document.createTextNode(ch)); return; }
+                var u = window.Voidel.fromText(ch)[0]; if (!u) { node.appendChild(document.createTextNode(ch)); return; }
+                var cv = document.createElement('canvas'), pad = s * 0.12;
+                cv.className = 'creed-glyph'; cv.setAttribute('aria-hidden', 'true');
+                cv.width = Math.round((s + pad * 2) * dpr); cv.height = Math.round((s + pad * 2) * dpr);
+                var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                ctx.strokeStyle = ctx.fillStyle = color;
+                window.Voidel.draw(ctx, u, pad, pad, s);
+                node.appendChild(cv);
+            });
+        });
     }
     var bs = document.querySelectorAll('.langs button');
     for (var b = 0; b < bs.length; b++) {
