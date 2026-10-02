@@ -114,10 +114,11 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
 
     <section>
         <div class="sec-head"><p class="tag">Logograms</p><h2>意味の字(漢字)</h2><span class="rule"></span></div>
-        <p class="note">漢字1字をヴォイデル文字1字で書きます。意味の部品を左右・上下・枠の中に組み合わせて作ります(試作 v0.1・小学1・2年の漢字240字ほか)。</p>
+        <p class="note">漢字1字をヴォイデル文字1字で書きます。意味の部品を左右・上下・枠の中に組み合わせて作ります(試作 v0.2・小学1〜3年の漢字440字ほか)。</p>
         <h3 class="lg-h">部品</h3><div class="grid" id="lg-parts"></div>
         <h3 class="lg-h">小学1年</h3><div class="grid" id="lg-g1"></div>
         <h3 class="lg-h">小学2年</h3><div class="grid" id="lg-g2"></div>
+        <h3 class="lg-h">小学3年</h3><div class="grid" id="lg-g3"></div>
         <h3 class="lg-h">そのほか</h3><div class="grid" id="lg-x"></div>
     </section>
 
@@ -246,7 +247,8 @@ footer { margin-top: 56px; border-top: 1px solid var(--abyss-edge); padding-top:
         var put = function (id, list) { list.forEach(function (ch) { cell(document.getElementById(id), [{ lg: ch }], ch + (LXW[ch] ? ' ' + LXW[ch] : ''), LG.chars[ch].l === 'one' ? '' : how(ch)); }); };
         put('lg-g1', LG.grade1.split(''));
         put('lg-g2', LG.grade2.split(''));
-        put('lg-x', Object.keys(LG.chars).filter(function (c) { return c[0] !== '\u0000' && LG.grade1.indexOf(c) < 0 && LG.grade2.indexOf(c) < 0; }));
+        put('lg-g3', (LG.grade3 || '').split(''));
+        put('lg-x', Object.keys(LG.chars).filter(function (c) { return c[0] !== '\u0000' && LG.grade1.indexOf(c) < 0 && LG.grade2.indexOf(c) < 0 && (LG.grade3 || '').indexOf(c) < 0; }));
     }
     // ヴォイデル語(lexicon.json)
     var LX = window.__LX;
