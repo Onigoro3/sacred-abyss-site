@@ -496,6 +496,13 @@ a.entry .where::after { content: " ↗"; color: var(--gold); }
 .bgm-toggle[aria-pressed="true"] .bgm-mark::after { animation: bgm-bar 0.9s ease-in-out -0.45s infinite alternate; }
 @keyframes bgm-bar { from { height: 2px; } to { height: 9px; } }
 @media (prefers-reduced-motion: reduce) { .bgm-toggle .bgm-mark::before, .bgm-toggle .bgm-mark::after { animation: none; } }
+/* 次の曲ボタンと、今流れている曲(2026-11-09 社長「次の曲のボタンを作って流れる曲の曲名とアーティスト名の表示を」) */
+.bgm-next { display: inline-flex; align-items: center; background: transparent; border: 1px solid rgba(201, 162, 39, 0.45); border-radius: 2px; padding: 3px 10px; cursor: pointer; font-family: var(--mono); font-size: clamp(0.48rem, 0.9vmin, 0.62rem); letter-spacing: 0.18em; color: var(--dim); text-transform: uppercase; transition: border-color 180ms ease, color 180ms ease; }
+.bgm-next:hover, .bgm-next:focus-visible { border-color: var(--gold); color: var(--bone); }
+.bgm-next[hidden] { display: none; }
+.bgm-now { margin: clamp(3px, 0.6vmin, 7px) 0 0; text-align: right; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--dim); min-height: 1.2em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-now .bgm-title { color: var(--bone); }
+.bgm-now[hidden] { display: none; }
 
 /* 2026-10-01 言語の切り替え(右上)。日本語・英語・中国語(簡体/繁体)・韓国語 */
 .langs { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px 10px; margin-right: clamp(6px, 1vmin, 14px); }
@@ -551,6 +558,8 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
     .langs button { font-size: 0.72rem; padding: 7px 9px; border: 1px solid rgba(201, 162, 39, 0.25); }
     .langs button[aria-current="true"] { border-color: var(--gold); }
     .bgm-toggle { font-size: 0.68rem; padding: 8px 12px; }
+    .bgm-next { font-size: 0.68rem; padding: 8px 12px; }
+    .bgm-now { text-align: left; font-size: 0.72rem; white-space: normal; }
     #bgm-volume { width: 120px; height: 3px; }
     #bgm-volume::-webkit-slider-thumb { width: 18px; height: 18px; }
     #bgm-volume::-moz-range-thumb { width: 18px; height: 18px; }
@@ -626,9 +635,11 @@ html[lang="ko"] body { font-family: "Noto Serif KR", "Noto Serif JP", serif; }
             <button type="button" id="bgm-toggle" class="bgm-toggle" aria-pressed="false" aria-label="BGM の再生と停止">
                 <span class="bgm-mark" aria-hidden="true"></span><span class="bgm-label">Sonus</span><span class="bgm-state">OFF</span>
             </button>
+            <button type="button" id="bgm-next" class="bgm-next" aria-label="次の曲">Next &#9656;&#9656;</button>
             <label class="bgm-vol"><span class="sr">Volume</span><input type="range" id="bgm-volume" min="0" max="100" step="1" value="50" aria-label="BGM volume"></label>
             </div>
-            <audio id="bgm" src="assets/sacred-void.mp3" loop preload="none"></audio>
+            <p id="bgm-now" class="bgm-now" aria-live="polite" hidden><span class="bgm-title"></span> <span class="bgm-sep">&mdash;</span> <span class="bgm-artist"></span></p>
+            <audio id="bgm" src="assets/sacred-void.mp3" preload="none"></audio>
         </div>
     </header>
 
@@ -1234,34 +1245,64 @@ function drawGlyph(ctx, x, y, s, rnd) {
    ・OFF と音量はこの端末だけに覚える
    ================================================================== */
 (function bgm() {
+    /* 2026-11-09 社長: ランダム再生(『深淵の序章』+ Sacred Girls・Wild Abyss)・次の曲ボタン・曲名とアーティスト名の表示。
+       start = 鳴り始め(秒)。曲が終わったら、今と違う曲をランダムに選んで続ける(同じ曲が2回続かない)。
+       1曲しか無い時は、その曲を鳴り始めからくり返す(次の曲ボタンは隠す) */
+    var TRACKS = [
+        { src: 'assets/sacred-void.mp3', title: '深淵の序章', artist: 'Sacred Abyss', start: 2.2 }
+        // 2バンドの曲はできたらここへ足す(社長の「出して」の後に公開)
+    ];
     var audioEl = document.getElementById('bgm');
     var btn = document.getElementById('bgm-toggle');
+    var nextBtn = document.getElementById('bgm-next');
     var vol = document.getElementById('bgm-volume');
-    if (!audioEl || !btn) return;
-    var SRC = audioEl.getAttribute('src');
-    var LOOP_START = 2.2;            // 鳴り始め(秒)。ffmpeg の silencedetect で測った値
+    var now = document.getElementById('bgm-now');
+    if (!audioEl || !btn || !TRACKS.length) return;
     var KEY = 'sa-bgm', VKEY = 'sa-bgm-vol';
-    var level = 0.5, wantOn = true, on = false;
+    var level = 0.5, wantOn = true, on = false, cur = -1;
     try { if (localStorage.getItem(KEY) === 'off') wantOn = false; } catch (e) {}
     try { var sv = localStorage.getItem(VKEY); if (sv !== null && !isNaN(+sv)) level = Math.max(0, Math.min(1, +sv)); } catch (e) {}
     if (vol) vol.value = Math.round(level * 100);
+    if (nextBtn && TRACKS.length < 2) nextBtn.hidden = true;
 
     var AC = window.AudioContext || window.webkitAudioContext;
-    var ctx = null, gain = null, buffer = null, source = null, loading = null;
+    var ctx = null, gain = null, source = null, buffers = {};
 
+    function pick() {
+        if (TRACKS.length < 2) return 0;
+        var i;
+        do { i = Math.floor(Math.random() * TRACKS.length); } while (i === cur);
+        return i;
+    }
     function show(v) {
         on = v;
         btn.setAttribute('aria-pressed', v ? 'true' : 'false');
         btn.querySelector('.bgm-state').textContent = v ? 'ON' : 'OFF';
+        if (now) now.hidden = !(v && cur >= 0);
     }
-    function load() {
-        if (loading) return loading;
+    function label() {
+        if (!now || cur < 0) return;
+        now.querySelector('.bgm-title').textContent = TRACKS[cur].title;
+        now.querySelector('.bgm-artist').textContent = TRACKS[cur].artist;
+        now.hidden = !on;
+    }
+    function remember(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+    // ---- Web Audio(音量つまみが iPhone でも効く・曲の頭の無音を飛ばせる)----
+    function ensureCtx() {
+        if (ctx) return;
         ctx = new AC();
         gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination);
-        loading = fetch(SRC).then(function (r) { return r.arrayBuffer(); }).then(function (ab) {
-            return new Promise(function (res, rej) { ctx.decodeAudioData(ab, res, rej); });
-        }).then(function (buf) { buffer = buf; return buf; });
-        return loading;
+    }
+    function loadBuf(i) {
+        var src = TRACKS[i].src;
+        if (!buffers[src]) {
+            buffers[src] = fetch(src).then(function (r) { return r.arrayBuffer(); }).then(function (ab) {
+                return new Promise(function (res, rej) { ctx.decodeAudioData(ab, res, rej); });
+            });
+            buffers[src].catch(function () { delete buffers[src]; });
+        }
+        return buffers[src];
     }
     function ramp(to, sec) {
         var t = ctx.currentTime;
@@ -1269,45 +1310,84 @@ function drawGlyph(ctx, x, y, s, rnd) {
         gain.gain.setValueAtTime(gain.gain.value, t);
         gain.gain.linearRampToValueAtTime(to, t + sec);
     }
-    function playWA() {
-        return load().then(function () {
-            return ctx.resume();
-        }).then(function () {
-            if (ctx.state !== 'running') throw new Error('blocked');
-            if (!source) {
-                source = ctx.createBufferSource();
-                source.buffer = buffer;
-                source.loop = true;
-                source.loopStart = Math.min(LOOP_START, buffer.duration - 1);
-                source.loopEnd = buffer.duration;
-                source.connect(gain);
-                source.start(0, source.loopStart);
-            }
+    function dropSource(later) {
+        var s0 = source; source = null;
+        if (!s0) return;
+        s0.onended = null;
+        if (later) setTimeout(function () { try { s0.stop(); } catch (e) {} }, 700);
+        else { try { s0.stop(); } catch (e) {} }
+    }
+    function startWA(i) {
+        cur = i;
+        return loadBuf(i).then(function (buf) {
+            if (cur !== i || !on) return;
+            dropSource(false);
+            var s = ctx.createBufferSource();
+            var st = Math.min(TRACKS[i].start || 0, buf.duration - 1);
+            s.buffer = buf;
+            if (TRACKS.length < 2) { s.loop = true; s.loopStart = st; s.loopEnd = buf.duration; }
+            s.connect(gain);
+            s.onended = function () { if (source === s && on) startWA(pick()); };
+            source = s;
+            s.start(0, st);
             ramp(level, 0.8);
-            show(true);
-            return true;
+            label();
+            if (TRACKS.length > 1) loadBuf((i + 1) % TRACKS.length).catch(function () {});
         });
     }
-    function stopWA() {
-        if (!ctx) return;
-        ramp(0, 0.6);
-        var s0 = source; source = null;
-        setTimeout(function () { try { if (s0) s0.stop(); } catch (e) {} }, 700);
+    function playWA() {
+        ensureCtx();
+        return ctx.resume().then(function () {
+            if (ctx.state !== 'running') throw new Error('blocked');
+            show(true);
+            if (source) { ramp(level, 0.8); label(); return true; }
+            return startWA(cur >= 0 ? cur : pick()).then(function () { return true; });
+        });
     }
-    function playEl() {
-        audioEl.loop = true; audioEl.volume = level;
+
+    // ---- 予備: Web Audio が無いブラウザ ----
+    function startEl(i) {
+        cur = i;
+        audioEl.loop = TRACKS.length < 2;
+        audioEl.src = TRACKS[i].src;
+        audioEl.volume = level;
+        var st = TRACKS[i].start || 0;
+        var seek = function () { audioEl.removeEventListener('loadedmetadata', seek); try { audioEl.currentTime = st; } catch (e) {} };
+        if (st) audioEl.addEventListener('loadedmetadata', seek);
         var p = audioEl.play();
-        return (p && p.then ? p : Promise.resolve()).then(function () { show(true); return true; });
+        return (p && p.then ? p : Promise.resolve()).then(function () { show(true); label(); return true; });
     }
+    audioEl.addEventListener('ended', function () { if (!AC && on) startEl(pick()); });
+    function playEl() {
+        if (cur >= 0 && audioEl.currentTime > 0) {
+            var p = audioEl.play();
+            return (p && p.then ? p : Promise.resolve()).then(function () { show(true); label(); return true; });
+        }
+        return startEl(cur >= 0 ? cur : pick());
+    }
+
     function play() { return (AC ? playWA() : playEl()).catch(function () { show(false); return false; }); }
-    function stop() { if (AC) stopWA(); else audioEl.pause(); show(false); }
-    function remember(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    function stop() {
+        if (AC) { if (ctx) { ramp(0, 0.6); dropSource(true); } } else audioEl.pause();
+        show(false);
+    }
+    function next() {
+        if (TRACKS.length < 2) return;
+        wantOn = true; remember(KEY, 'on');
+        var i = pick();
+        if (!AC) { startEl(i).catch(function () { show(false); }); return; }
+        if (on && source) {
+            ramp(0, 0.25);
+            setTimeout(function () { startWA(i); }, 260);
+        } else { cur = i; dropSource(false); play(); }
+    }
 
     btn.addEventListener('click', function (ev) {
         ev.stopPropagation();
         if (on) { wantOn = false; remember(KEY, 'off'); stop(); }
         else { wantOn = true; remember(KEY, 'on'); play(); }
     });
+    if (nextBtn) nextBtn.addEventListener('click', function (ev) { ev.stopPropagation(); next(); });
     if (vol) {
         vol.addEventListener('input', function () {
             level = vol.value / 100;
@@ -1321,7 +1401,7 @@ function drawGlyph(ctx, x, y, s, rnd) {
     play().then(function (ok) {
         if (ok) return;
         var once = function (ev) {
-            if (ev && ev.target && (btn.contains(ev.target) || (vol && vol.contains(ev.target)))) return;
+            if (ev && ev.target && (btn.contains(ev.target) || (vol && vol.contains(ev.target)) || (nextBtn && nextBtn.contains(ev.target)))) return;
             document.removeEventListener('pointerdown', once, true);
             document.removeEventListener('keydown', once, true);
             if (wantOn && !on) play();
